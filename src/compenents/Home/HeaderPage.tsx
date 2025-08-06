@@ -27,6 +27,7 @@ export default function HeaderPage() {
                     src="/image/Banner3.jpg"
                     alt="Background"
                     fill
+                    priority
                     className="object-cover w-full h-full blur-sm opacity-30"
                 />
             </div>

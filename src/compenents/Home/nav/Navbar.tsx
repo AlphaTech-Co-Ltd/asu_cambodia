@@ -4,6 +4,7 @@ import {NavLinks} from "@/constant_components/constants";
 import Link from 'next/link';
 import {HiBars3} from "react-icons/hi2";
 import {useEffect, useState} from "react";
+import LanguageChange from "@/compenents/Home/Language_Change";
 
 type Props = {
     openNav: ()=> void;
@@ -45,24 +46,20 @@ export default function NavBar({ openNav }: Props) {
                     ))}
                 </div>
                 {/*Button Log in and Sign Up*/}
-                <div className="flex items-center space-x-4">
-                    <a href="#" className="relative inline-flex items-center justify-center
-                   px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3
-                   overflow-hidden font-semibold
-                   text-white bg-yellow-500 rounded-lg shadow-md
-                   transition-all duration-300 ease-in-out group
-                   hover:bg-yellow-700 text-sm sm:text-base md:text-lg">
+                <div className="hidden sm:flex items-center space-x-4">
+                    {/* Create Account Button */}
+                    <a href="#" className="relative inline-flex w-30 h-9 items-center justify-center px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3
+                   overflow-hidden font-semibold text-white
+                   bg-yellow-500 rounded-lg shadow-md group
+                   transition-all duration-300 ease-in-out
+                   text-sm sm:text-base md:text-lg hover:bg-yellow-700">
                         <span className="absolute inset-0 bg-white rounded-lg transform scale-0 group-hover:scale-150 transition-transform duration-500 ease-in-out"></span>
-                        <span className="relative z-10 transition-colors duration-300 ease-in-out group-hover:text-yellow-500">
-                            Create Account
-                        </span>
+                        <span className="relative z-10 group-hover:text-yellow-500 transition-colors duration-300 text-sm ease-in-out">Login</span>
                     </a>
-                    {/* Theme goggle Dark and Light */}
-
-                    {/* Language Changing*/}
-
-                    {/* MenuBar for Responsive */}
-                    <HiBars3 onClick={openNav} className={"w-8 h-8 cursor-pointer text-white lg:hidden"}/>
+                </div>
+                <div className="flex items-center space-x-4">
+                    <LanguageChange />
+                    <HiBars3 onClick={openNav} className="w-8 h-8 text-white cursor-pointer lg:hidden transition-transform duration-200 hover:scale-110"/>
                 </div>
             </div>
         </div>
