@@ -23,13 +23,7 @@ export default function HeaderPage() {
     return (
         <div className="relative bg-blue-950 w-full h-screen flex items-center">
             <div className="absolute inset-0 z-0">
-                <Image
-                    src="/image/Banner3.jpg"
-                    alt="Background"
-                    fill
-                    priority
-                    className="object-cover w-full h-full blur-sm opacity-30"
-                />
+                <Image src="/image/Banner3.jpg" alt="Background" fill priority className="object-cover w-full h-full blur-sm opacity-30"/>
             </div>
             <div className="w-[90%] md:w-[80%] mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10 items-center">
                 {/* Text Section */}

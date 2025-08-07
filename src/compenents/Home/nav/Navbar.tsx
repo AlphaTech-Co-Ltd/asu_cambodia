@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {HiBars3} from "react-icons/hi2";
 import {useEffect, useState} from "react";
 import LanguageChange from "@/compenents/Home/Language_Change";
+import ThemeToggle from "@/constant_components/Helper/ThemeToggle";
 
 type Props = {
     openNav: ()=> void;
@@ -58,6 +59,7 @@ export default function NavBar({ openNav }: Props) {
                     </a>
                 </div>
                 <div className="flex items-center space-x-4">
+                    <ThemeToggle/>
                     <LanguageChange />
                     <HiBars3 onClick={openNav} className="w-8 h-8 text-white cursor-pointer lg:hidden transition-transform duration-200 hover:scale-110"/>
                 </div>

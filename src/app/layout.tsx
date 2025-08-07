@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Montserrat } from 'next/font/google';
 import Responsive from "@/compenents/Home/nav/ResponsiveNav";
+import Provider from "@/constant_components/Provider/Provider";
 
 const getFont = Montserrat({
     weight : ["300", "400", "500", "600", "700"],
@@ -19,10 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
         <body className={`${getFont.className} antialiased`}>
-            <Responsive/>
-            {children}
+            <Provider>
+                <Responsive/>
+                {children}
+            </Provider>
         </body>
     </html>
   );
