@@ -1,4 +1,4 @@
-import { FaHome, FaInfoCircle, FaServicestack, FaBriefcase, FaPhoneAlt } from "react-icons/fa";
+import { FaHome, FaInfoCircle, FaServicestack, FaPhoneAlt } from "react-icons/fa";
 
 export const NavLinks = [
     {
@@ -9,8 +9,8 @@ export const NavLinks = [
     },
     {
         id: 2,
-        url: '/about_us',
-        label: 'About',
+        url: '/Information',
+        label: 'Information',
         icon: <FaInfoCircle />,
     },
     {
@@ -21,13 +21,7 @@ export const NavLinks = [
     },
     {
         id: 4,
-        url: '/portfolio',
-        label: 'Portfolio',
-        icon: <FaBriefcase />,
-    },
-    {
-        id: 5,
-        url: '/contact_us',
+        url: '/ContactUs',
         label: 'Contact',
         icon: <FaPhoneAlt />,
     },

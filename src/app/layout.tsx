@@ -3,6 +3,9 @@ import "./globals.css";
 import { Montserrat } from 'next/font/google';
 import Responsive from "@/compenents/Home/nav/ResponsiveNav";
 import Provider from "@/constant_components/Provider/Provider";
+import FooterPage from "@/compenents/Home/Footer";
+import ScrollToTop from "@/constant_components/Helper/ScrollToTop";
+import ResponsiveNav from "@/compenents/Home/nav/ResponsiveNav";
 
 const getFont = Montserrat({
     weight : ["300", "400", "500", "600", "700"],
@@ -23,8 +26,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
         <body className={`${getFont.className} antialiased`}>
             <Provider>
-                <Responsive/>
+                <ResponsiveNav/>
                 {children}
+                <FooterPage/>
+                <ScrollToTop/>
             </Provider>
         </body>
     </html>
