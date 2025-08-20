@@ -143,9 +143,14 @@ export default function AuthPage() {
                     confirmPassword: "",
                 }));
             }
-        } catch (err: never) {
-            setError(err.message || "Something went wrong");
-        } finally {
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("Something went wrong");
+            }
+        }
+        finally {
             setLoading(false);
         }
     }

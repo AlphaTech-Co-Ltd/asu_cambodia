@@ -64,10 +64,15 @@ export default function ProfilePage() {
                 };
 
                 setUserData(formattedData);
-            } catch (err: never) {
+            } catch (err: unknown) {
                 console.error("Error loading user data:", err);
-                setError(err.message || "Failed to load user data");
-            } finally {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("Failed to load user data");
+                }
+            }
+            finally {
                 setLoading(false);
             }
         };
@@ -113,8 +118,12 @@ export default function ProfilePage() {
             }
 
             setShowEditPassword(false);
-        } catch (err: never) {
-            setError(err.message || "Something went wrong");
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("Something went wrong");
+            }
         }
     };
 

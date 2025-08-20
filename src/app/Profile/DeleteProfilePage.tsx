@@ -56,9 +56,14 @@ export default function DeleteProfilePage({ userId }: DeleteProfileProps) {
 
             // Redirect to login page
             window.location.replace("/");
-        } catch (error: never) {
-            setMessage(`❌ ${error.message}`);
-        } finally {
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setMessage(`❌ ${error.message}`);
+            } else {
+                setMessage("❌ Something went wrong");
+            }
+        }
+        finally {
             setLoading(false);
             setShowDialog(false);
             setConfirmUsername("");

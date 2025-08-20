@@ -38,14 +38,19 @@ export default function EditPasswordDialog({ onClose, onSubmit }: Props) {
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
-        } catch (err: never) {
-            // Show server-provided error message
-            if (err.message === "Incorrect current password") {
-                setError("Current password is incorrect");
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                // Show server-provided error message
+                if (err.message === "Incorrect current password") {
+                    setError("Current password is incorrect");
+                } else {
+                    setError(err.message || "Failed to update password");
+                }
             } else {
-                setError(err.message || "Failed to update password");
+                setError("Failed to update password");
             }
-        } finally {
+        }
+        finally {
             setLoading(false);
         }
     };
