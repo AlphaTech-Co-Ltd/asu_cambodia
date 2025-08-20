@@ -64,7 +64,7 @@ export default function ProfilePage() {
                 };
 
                 setUserData(formattedData);
-            } catch (err: any) {
+            } catch (err: never) {
                 console.error("Error loading user data:", err);
                 setError(err.message || "Failed to load user data");
             } finally {
@@ -113,7 +113,7 @@ export default function ProfilePage() {
             }
 
             setShowEditPassword(false);
-        } catch (err: any) {
+        } catch (err: never) {
             setError(err.message || "Something went wrong");
         }
     };
