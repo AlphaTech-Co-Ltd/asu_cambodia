@@ -13,7 +13,7 @@ export default function FooterPage() {
               href="/"
               className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
               <Image
-                src="/Logo/Logo_New.png"
+                src="/Logo/Logo.jpg"
                 alt="Logo"
                 priority
                 width={40}

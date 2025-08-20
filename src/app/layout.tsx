@@ -6,6 +6,7 @@ import Provider from "@/constant_components/Provider/Provider";
 import FooterPage from "@/compenents/Home/Footer";
 import ScrollToTop from "@/constant_components/Helper/ScrollToTop";
 import ResponsiveNav from "@/compenents/Home/nav/ResponsiveNav";
+import {AuthProvider} from "@/constant_components/context/AuthContext";
 
 const getFont = Montserrat({
     weight : ["300", "400", "500", "600", "700"],
@@ -26,10 +27,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
         <body className={`${getFont.className} antialiased`}>
             <Provider>
-                <ResponsiveNav/>
-                {children}
-                <FooterPage/>
-                <ScrollToTop/>
+                <AuthProvider>
+                    <ResponsiveNav/>
+                    {children}
+                    <FooterPage/>
+                    <ScrollToTop/>
+                </AuthProvider>
             </Provider>
         </body>
     </html>
