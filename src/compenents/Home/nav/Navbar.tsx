@@ -133,7 +133,7 @@ export default function NavBar({ openNav }: Props) {
                                         <div className="relative w-10 h-10 rounded-full border-2 border-white group-hover:border-yellow-400 transition-colors duration-200 overflow-hidden">
                                             <Image
                                                 src={avatar}
-                                                alt={`${user.firstName} ${user.lastName} avatar`}
+                                                alt={`avatar`}
                                                 fill
                                                 className="object-cover"
                                                 unoptimized
