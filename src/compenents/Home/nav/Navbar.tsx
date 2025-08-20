@@ -8,7 +8,7 @@ import LanguageChange from "@/compenents/Home/Language_Change";
 import ThemeToggle from "@/constant_components/Helper/ThemeToggle";
 import { NavLinks } from "@/constant_components/constants";
 import { useAuth } from "@/constant_components/context/AuthContext";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 type Props = {
     openNav: () => void;
@@ -37,7 +37,6 @@ export default function NavBar({ openNav }: Props) {
                 setDropdownOpen(false);
             }
         }
-
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
@@ -55,6 +54,11 @@ export default function NavBar({ openNav }: Props) {
             ? user.avatar
             : `${process.env.NEXT_PUBLIC_API_URL}/api/republic/files/${user.avatar.replace(/^\/+/, "")}`
         : null;
+
+    // Display name fallback
+    const displayName = user?.firstName && user?.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user?.username || "User";
 
     return (
         <nav
@@ -142,7 +146,7 @@ export default function NavBar({ openNav }: Props) {
                                         </div>
                                     ) : (
                                         <div className="w-10 h-10 bg-yellow-400 text-blue-900 font-bold rounded-full flex items-center justify-center uppercase text-lg border-2 border-white group-hover:border-yellow-400 transition-colors">
-                                            {user.username.charAt(0)}
+                                            {displayName.charAt(0)}
                                         </div>
                                     )}
                                 </button>
@@ -151,13 +155,17 @@ export default function NavBar({ openNav }: Props) {
                                 {dropdownOpen && (
                                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 z-50 overflow-hidden animate-fadeIn">
                                         <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                                            <p className="text-gray-900 font-semibold text-sm truncate">{user.firstName} {user.lastName}</p>
+                                            <p className="text-gray-900 font-semibold text-sm truncate">{displayName}</p>
                                             {user.email && (
                                                 <p className="text-gray-500 text-xs truncate mt-1">{user.email}</p>
                                             )}
                                         </div>
                                         <div className="py-1">
-                                            <Link href={"/Profile"} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center" onClick={() => setDropdownOpen(false)}>
+                                            <Link
+                                                href={"/Profile"}
+                                                className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center"
+                                                onClick={() => setDropdownOpen(false)}
+                                            >
                                                 <span className="mr-2">👤</span>
                                                 Your Profile
                                             </Link>
