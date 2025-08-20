@@ -50,7 +50,7 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
     }, []);
 
     // Determine animation classes based on visibility and scroll direction
-    let animationClasses = "";
+    let animationClasses: string;
     if (isVisible && scrollDirection === "down") {
         // Animate in on scroll down
         animationClasses = "opacity-100 translate-y-0 transition-all duration-700 ease-out";

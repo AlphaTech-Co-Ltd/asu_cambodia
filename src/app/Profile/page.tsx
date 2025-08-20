@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import {FiEdit, FiKey, FiUser, FiMail, FiClock, FiDelete, FiTrash} from "react-icons/fi";
+import {FiEdit, FiKey, FiUser, FiMail, FiClock} from "react-icons/fi";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import EditPasswordDialog from "@/app/Profile/EditPasswordDialog";
