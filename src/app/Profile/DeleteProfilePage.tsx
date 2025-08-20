@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { FiTrash2 } from "react-icons/fi";
 import { MdWarning } from "react-icons/md";
 
