@@ -14,7 +14,7 @@ export default function NotFound() {
             <p className="text-gray-600 dark:text-gray-300 mb-6">
                 The page you&#39;re looking for doesn&#39;t exist or has been moved.
             </p>
-            <Image src="/image/404Found.gif" alt="Not Found" width={600} height={600} priority/>
+            <Image src="/image/404Found.gif" alt="Not Found" width={600} height={600} priority unoptimized/>
 
             {/* "Go Back" Button */}
             <button onClick={() => router.back()} className="mt-6 px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition duration-300">

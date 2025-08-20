@@ -6,12 +6,11 @@ export default function ContactUsPage() {
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
-    const [status, setStatus] = useState(""); // "success" or "error"
+    const [status, setStatus] = useState<"" | "success" | "error">("");
 
     const TELEGRAM_BOT_TOKEN = "8461799143:AAHlwmura72q0t0-O154c6GGMkAnb3PGfgQ";
     const TELEGRAM_CHAT_ID = "8461799143"; // replace with your numeric chat ID
 
-    // Escape Markdown special characters
     const escapeMarkdown = (text: string) =>
         text.replace(/([_*[\]()~`>#+-=|{}.!])/g, "\\$1");
 
@@ -19,7 +18,7 @@ export default function ContactUsPage() {
         e.preventDefault();
 
         if (!name || !phone || !email || !message) {
-            alert("Please fill in all fields!");
+            setStatus("error");
             return;
         }
 
@@ -48,7 +47,6 @@ export default function ContactUsPage() {
 
             if (data.ok) {
                 setStatus("success");
-                alert("Message sent successfully!");
                 setName("");
                 setPhone("");
                 setEmail("");
@@ -56,12 +54,10 @@ export default function ContactUsPage() {
             } else {
                 setStatus("error");
                 console.error(data);
-                alert("Failed to send message!");
             }
         } catch (err) {
             console.error(err);
             setStatus("error");
-            alert("Something went wrong!");
         }
     };
 
@@ -144,6 +140,16 @@ export default function ContactUsPage() {
                                 onChange={(e) => setMessage(e.target.value)}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                             ></textarea>
+
+                            {/* Status Message */}
+                            {status === "success" && (
+                                <p className="text-green-500 font-medium">Message sent successfully!</p>
+                            )}
+                            {status === "error" && (
+                                <p className="text-red-500 font-medium">
+                                    Please fill all fields or try again.
+                                </p>
+                            )}
 
                             {/* Submit Button */}
                             <button
