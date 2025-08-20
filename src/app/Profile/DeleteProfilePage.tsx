@@ -10,7 +10,6 @@ type DeleteProfileProps = {
 };
 
 export default function DeleteProfilePage({ userId }: DeleteProfileProps) {
-    const router = useRouter();
     const [showDialog, setShowDialog] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
@@ -58,7 +57,7 @@ export default function DeleteProfilePage({ userId }: DeleteProfileProps) {
 
             // Redirect to login page
             window.location.replace("/");
-        } catch (error: any) {
+        } catch (error: never) {
             setMessage(`❌ ${error.message}`);
         } finally {
             setLoading(false);

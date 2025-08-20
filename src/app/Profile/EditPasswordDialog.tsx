@@ -38,7 +38,7 @@ export default function EditPasswordDialog({ onClose, onSubmit }: Props) {
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
-        } catch (err: any) {
+        } catch (err: never) {
             // Show server-provided error message
             if (err.message === "Incorrect current password") {
                 setError("Current password is incorrect");
