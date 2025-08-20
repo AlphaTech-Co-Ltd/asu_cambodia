@@ -6,6 +6,7 @@ import { useAuth } from "@/constant_components/context/AuthContext";
 import ErrorDialog from "@/constant_components/context/ErrorDialog";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
+import Image from "next/image";
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -101,7 +102,7 @@ export default function AuthPage() {
             } else {
                 const body = new FormData();
                 Object.entries(formData).forEach(([key, value]) => {
-                    if (value !== null) body.append(key, value as any);
+                    if (value !== null) body.append(key, value as never);
                 });
 
                 res = await fetch(endpoint, {
@@ -142,7 +143,7 @@ export default function AuthPage() {
                     confirmPassword: "",
                 }));
             }
-        } catch (err: any) {
+        } catch (err: never) {
             setError(err.message || "Something went wrong");
         } finally {
             setLoading(false);
@@ -206,7 +207,7 @@ export default function AuthPage() {
                             <div>
                                 {preview && (
                                     <div className="mt-3 flex justify-center">
-                                        <img
+                                        <Image
                                             src={preview}
                                             alt="Profile Preview"
                                             className="w-24 h-24 rounded-full object-cover border-2 border-blue-500 shadow-md"
