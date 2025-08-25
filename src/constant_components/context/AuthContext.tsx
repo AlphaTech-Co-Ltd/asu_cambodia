@@ -6,6 +6,8 @@ type User = {
     username: string;
     email: string;
     avatar?: string;
+    firstName?: string;   // ✅ added
+    lastName?: string;    // ✅ added
 };
 
 type AuthContextType = {
