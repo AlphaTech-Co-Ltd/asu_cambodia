@@ -6,6 +6,7 @@ import { useAuth } from "@/constant_components/context/AuthContext";
 import ErrorDialog from "@/constant_components/context/ErrorDialog";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
+import SuccessDialog from "@/app/LoginAndRegister/SuccessDialogProps";
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -23,6 +24,7 @@ export default function AuthPage() {
         imageUrl: null as File | null,
     });
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState(""); // Add success message state
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const router = useRouter();
@@ -31,6 +33,7 @@ export default function AuthPage() {
     const toggleAuthMode = () => {
         setIsLogin(!isLogin);
         setError("");
+        setSuccessMessage(""); // Clear success message when toggling
         setStep(1);
     };
 
@@ -56,6 +59,7 @@ export default function AuthPage() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError("");
+        setSuccessMessage(""); // Clear success message
         setLoading(true);
 
         if (!formData.username || !formData.password) {
@@ -134,8 +138,8 @@ export default function AuthPage() {
                 login(user, token);
                 router.push("/");
             } else {
-                setIsLogin(true);
-                setError("Registration successful! Please login.");
+                setSuccessMessage("Registration successful! You can now login with your credentials.");
+
                 setFormData((prev) => ({
                     ...prev,
                     password: "",
@@ -439,7 +443,16 @@ export default function AuthPage() {
                         </>
                     )}
 
-                    {error && <ErrorDialog message={error} onClose={() => setError("")} />}
+                    {error && <ErrorDialog onClose={() => setError("")} />}
+                    {successMessage && (
+                        <SuccessDialog
+                            message={successMessage}
+                            onClose={() => {
+                                setSuccessMessage("");
+                                setIsLogin(true);
+                            }}
+                        />
+                    )}
                 </form>
             </section>
         </main>

@@ -2,11 +2,10 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
 
 type ErrorDialogProps = {
-    message: string;
     onClose: () => void;
 };
 
-export default function ErrorDialog({ message, onClose }: ErrorDialogProps) {
+export default function ErrorDialog({ onClose }: ErrorDialogProps) {
     return (
         <AnimatePresence>
             <motion.div
@@ -40,7 +39,7 @@ export default function ErrorDialog({ message, onClose }: ErrorDialogProps) {
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                                 Something went wrong
                             </h2>
-                            <p className="text-gray-600 dark:text-gray-300">{message}</p>
+                            <p className="text-gray-600 dark:text-gray-300">Please check the information again please!</p>
                         </div>
                     </div>
                     <div className="mt-6">
