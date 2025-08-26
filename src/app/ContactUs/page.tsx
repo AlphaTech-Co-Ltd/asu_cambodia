@@ -8,13 +8,9 @@ export default function ContactUsPage() {
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState<"" | "success" | "error">("");
 
-    const TELEGRAM_BOT_TOKEN = "8461799143:AAHlwmura72q0t0-O154c6GGMkAnb3PGfgQ";
-    const TELEGRAM_CHAT_ID = "8461799143"; // replace with your numeric chat ID
+    const FACEBOOK_PAGE_ID = "61551365065183"; // your Facebook profile/page ID
 
-    const escapeMarkdown = (text: string) =>
-        text.replace(/([_*[\]()~`>#+-=|{}.!])/g, "\\$1");
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name || !phone || !email || !message) {
@@ -22,43 +18,27 @@ export default function ContactUsPage() {
             return;
         }
 
-        const text = `
-📩 *New Contact Message*
-*Name:* ${escapeMarkdown(name)}
-*Phone:* ${escapeMarkdown(phone)}
-*Email:* ${escapeMarkdown(email)}
-*Message:* ${escapeMarkdown(message)}
-    `;
+        // Construct message for Messenger
+        const messengerMessage = `
+Name: ${name}
+Phone: ${phone}
+Email: ${email}
+Message: ${message}
+        `.trim();
 
-        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        // URL encode and open Messenger link
+        const messengerURL = `https://m.me/${FACEBOOK_PAGE_ID}?ref=${encodeURIComponent(
+            messengerMessage
+        )}`;
 
-        try {
-            const res = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text,
-                    parse_mode: "MarkdownV2",
-                }),
-            });
+        window.open(messengerURL, "_blank");
 
-            const data = await res.json();
-
-            if (data.ok) {
-                setStatus("success");
-                setName("");
-                setPhone("");
-                setEmail("");
-                setMessage("");
-            } else {
-                setStatus("error");
-                console.error(data);
-            }
-        } catch (err) {
-            console.error(err);
-            setStatus("error");
-        }
+        // Reset form
+        setStatus("success");
+        setName("");
+        setPhone("");
+        setEmail("");
+        setMessage("");
     };
 
     const location =
@@ -91,8 +71,8 @@ export default function ContactUsPage() {
                             ></iframe>
                         </div>
                         <span className="absolute -top-4 -left-4 bg-blue-600 text-white px-3 py-1 text-xs font-semibold rounded-full shadow-md">
-              📍 Our Location
-            </span>
+                            📍 Our Location
+                        </span>
                     </div>
 
                     {/* Right Side: Contact Form */}
@@ -101,11 +81,10 @@ export default function ContactUsPage() {
                             Let’s Talk
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
-                            Fill out the form below and we’ll respond within 24 hours.
+                            Fill out the form below and we’ll respond via Messenger.
                         </p>
 
                         <form className="space-y-5" onSubmit={handleSubmit}>
-                            {/* Full Name & Phone */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <input
                                     type="text"
@@ -123,7 +102,6 @@ export default function ContactUsPage() {
                                 />
                             </div>
 
-                            {/* Email */}
                             <input
                                 type="email"
                                 placeholder="Email Address"
@@ -132,7 +110,6 @@ export default function ContactUsPage() {
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                             />
 
-                            {/* Message */}
                             <textarea
                                 rows={4}
                                 placeholder="Message"
@@ -141,34 +118,20 @@ export default function ContactUsPage() {
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                             ></textarea>
 
-                            {/* Status Message */}
                             {status === "success" && (
-                                <p className="text-green-500 font-medium">Message sent successfully!</p>
+                                <p className="text-green-500 font-medium">Message ready to send via Messenger!</p>
                             )}
                             {status === "error" && (
                                 <p className="text-red-500 font-medium">
-                                    Please fill all fields or try again.
+                                    Please fill all fields before sending.
                                 </p>
                             )}
 
-                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 className="w-full py-3 px-5 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-[1.02] active:scale-[0.97] flex items-center justify-center gap-2"
                             >
-                                Send Message
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
+                                Send via Messenger
                             </button>
                         </form>
                     </div>

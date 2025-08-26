@@ -3,112 +3,191 @@ import Image from "next/image";
 import { FaFacebook, FaInstagram, FaTelegram, FaYoutube } from "react-icons/fa";
 
 export default function FooterPage() {
-  return (
-    <div className="pt-16 pb-16 bg-blue-950">
-      <div className="w-[80%] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-10 items-start">
-        {/* Logo & Description */}
-        <div>
-          <div className="flex items-center space-x-2">
-            <Link
-              href="/"
-              className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-              <Image
-                src="/Logo/Logo.jpg"
-                alt="Logo"
-                priority
-                width={40}
-                height={40}
-                className="rounded-full object-cover"
-              />
-            </Link>
-            <h1 className="text-xl font-bold text-white md:text-2xl">
-              ASU Cambodia
-            </h1>
-          </div>
+    return (
+        <footer className="bg-blue-950 text-white pt-16 pb-12">
+            <div className="w-[90%] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+                {/* Logo & Description */}
+                <div className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                        <Link
+                            href="/"
+                            className="w-12 h-12 bg-white rounded-full flex items-center justify-center"
+                        >
+                            <Image
+                                src="/Logo/Logo.jpg"
+                                alt="Logo"
+                                width={40}
+                                height={40}
+                                className="rounded-full object-cover"
+                                priority
+                            />
+                        </Link>
+                        <h1 className="text-2xl font-bold">ASU Cambodia</h1>
+                    </div>
+                    <p className="text-gray-200 text-sm md:text-base">
+                        Ambitious Students Ubiquitous is the exclusive representative of Angelo State University in Cambodia.
+                    </p>
 
-          <p className="mt-4 text-gray-200 font-medium">
-            Ambitious Students Ubiquitous is the exclusive representative of
-            Angelo State University in Cambodia.
-          </p>
+                    {/* Social Icons */}
+                    <div className="flex items-center space-x-3 mt-4">
+                        <a
+                            href="https://www.facebook.com/ambitiousstudentsubiquitous"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                        >
+                            <FaFacebook className="text-[#1877F2]" size={18} />
+                        </a>
+                        <a
+                            href="https://t.me/globalpromgram_asu"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                        >
+                            <FaTelegram className="text-[#0088cc]" size={18} />
+                        </a>
+                        <a
+                            href="https://www.instagram.com/ambitiousstudentsubiquitous"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                        >
+                            <FaInstagram className="text-[#E4405F]" size={18} />
+                        </a>
+                        <a
+                            href="https://www.youtube.com/@angelostate"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                        >
+                            <FaYoutube className="text-red-700" size={18} />
+                        </a>
+                    </div>
+                </div>
 
-          {/* Social Icons */}
-          <div className="mt-6 flex items-center space-x-3">
-            <a
-              href="https://www.facebook.com/ambitiousstudentsubiquitous"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="w-8 h-8 flex items-center justify-center bg-white rounded hover:bg-gray-200 transition">
-              <FaFacebook className="text-[#1877F2]" /> {/* Facebook Blue */}
-            </a>
+                {/* Company Links */}
+                <div className="space-y-4">
+                    <h2 className="text-xl font-bold">Company</h2>
+                    <ul className="space-y-2">
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                About Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                News & Press
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Our Students
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Careers
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-            <a
-              href="https://t.me/globalpromgram_asu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-8 h-8 flex items-center justify-center bg-white rounded hover:bg-gray-200 transition">
-              <FaTelegram className="text-[#0088cc]" /> {/* Telegram Blue */}
-            </a>
+                {/* Programs Links */}
+                <div className="space-y-4">
+                    <h2 className="text-xl font-bold">Programs</h2>
+                    <ul className="space-y-2">
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Undergraduate
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Graduate
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Scholarships
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Online Learning
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-            <a
-              href="https://www.instagram.com/ambitiousstudentsubiquitous"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-8 h-8 flex items-center justify-center bg-white rounded hover:bg-gray-200 transition">
-              <FaInstagram className="text-[#E4405F]" />{" "}
-              {/* Instagram Pink-Red */}
-            </a>
+                {/* Contact Links */}
+                <div className="space-y-4">
+                    <h2 className="text-xl font-bold">Contact</h2>
+                    <ul className="space-y-2">
+                        <li>
+                            <a href="/ContactUs" className="text-gray-200 hover:text-white transition duration-200">
+                                Contact Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Support
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                FAQs
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                                Visit Campus
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
-            <a
-              href="https://www.youtube.com/@angelostate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-8 h-8 flex items-center justify-center bg-white rounded hover:bg-gray-200 transition">
-              <FaYoutube className="text-red-700" />{" "}
-              {/* TikTok default black, or use #010101 */}
-            </a>
-          </div>
-        </div>
-        <div className={"space-y-5"}>
-          <h1 className={"text-xl font-bold text-white"}>Company</h1>
-          <p className={"footer__link"}>About US</p>
-          <p className={"footer__link"}>News & Press</p>
-          <p className={"footer__link"}>Our Student</p>
-          <p className={"footer__link"}>Careers</p>
-        </div>
-      </div>
-      <div
-        className={
-          "mt-8 w-[80%] mx-auto border-t pt-8 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm"
-        }>
-        <p className={"text-center text-white md:text-left"}>
-          Copyright © 2025 AUS Cambodia. All rights reserved
-        </p>
-        <div className={"flex items-center text-white space-x-4 mt-4 md:mt-0"}>
-          <span>Social Media:</span>
-          <a
-            href="https://www.facebook.com/ambitiousstudentsubiquitous"
-            rel="noopener noreferrer"
-            target="_blank"
-            className="w-8 h-8 flex items-center justify-center bg-white rounded hover:bg-gray-200 transition">
-            <FaFacebook className="text-[#1877F2]" /> {/* Facebook Blue */}
-          </a>
-          <a
-            href="https://t.me/globalpromgram_asu"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-8 h-8 flex items-center justify-center bg-white rounded hover:bg-gray-200 transition">
-            <FaTelegram className="text-[#0088cc]" /> {/* Telegram Blue */}
-          </a>
-          <a
-            href="https://www.instagram.com/ambitiousstudentsubiquitous"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-8 h-8 flex items-center bg-white justify-center rounded hover:bg-gray-200 transition">
-            <FaInstagram className="text-[#E4405F]" />{" "}
-            {/* Instagram Pink-Red */}
-          </a>
-        </div>
-      </div>
-    </div>
-  );
+            {/* Copyright & Bottom */}
+            <div className="mt-12 w-[90%] mx-auto border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <p className="text-center md:text-left text-gray-300 text-sm">
+                    © 2025 ASU Cambodia. All rights reserved.
+                </p>
+                <div className="flex items-center space-x-3 mt-4 md:mt-0">
+                    <span className="text-gray-300 text-sm">Follow us:</span>
+                    <a
+                        href="https://www.facebook.com/ambitiousstudentsubiquitous"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                    >
+                        <FaFacebook className="text-[#1877F2]" size={16} />
+                    </a>
+                    <a
+                        href="https://t.me/globalpromgram_asu"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                    >
+                        <FaTelegram className="text-[#0088cc]" size={16} />
+                    </a>
+                    <a
+                        href="https://www.instagram.com/ambitiousstudentsubiquitous"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                    >
+                        <FaInstagram className="text-[#E4405F]" size={16} />
+                    </a>
+                    <a
+                        href="https://www.youtube.com/@angelostate"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:bg-gray-200 transition duration-300"
+                    >
+                        <FaYoutube className="text-red-700" size={16} />
+                    </a>
+                </div>
+            </div>
+        </footer>
+    );
 }

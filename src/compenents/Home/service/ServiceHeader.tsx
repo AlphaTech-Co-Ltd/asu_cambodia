@@ -98,22 +98,22 @@ export default function ServiceHeader() {
                 >
                     {[
                         {
-                            image: "/icon/consultation.png",
-                            title: "Visa Consultation Service",
+                            image: "/icon/visa.png",
+                            title: "Visa & Documentation Support",
                             description:
-                                "Get expert advice for U.S. student and tourist visa applications. We guide you through the process, help with documentation, and increase your chances of approval.",
+                                "We help you with student visa applications, embassy interview preparation, health insurance, and provide regular updates via email or SMS.",
                         },
                         {
-                            image: "/icon/opportunities.png",
-                            title: "Study Opportunities Abroad",
+                            image: "/icon/icons8-scholarship-100.png",
+                            title: "Scholarship Opportunities",
                             description:
-                                "Explore top universities in the U.S. and Australia. We connect you with programs at all levels—bachelor's, master's, PhD, and vocational—with affordable tuition options.",
+                                "We guarantee affordable tuition fees, assist with study packages or scholarships, and connect you with opportunities to study abroad.",
                         },
                         {
-                            image: "/icon/assistance.png",
-                            title: "Visa Application Assistance",
+                            image: "/icon/icons8-training-100.png",
+                            title: "Training Orientation",
                             description:
-                                "We help you complete and submit your visa applications properly and on time, reducing errors and making the process easier and stress-free.",
+                                "We organize seminars, workshops, and pre-departure orientation sessions to prepare you for studying and living in Australia.",
                         },
                     ].map((card, index) => (
                         <div key={index} className="h-full flex">
