@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { GoArrowUpRight } from "react-icons/go";
 
 interface CardProps {
@@ -12,39 +13,20 @@ interface CardProps {
 export default function ScrollDirectionCard({ image, title, description }: CardProps) {
     const ref = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(false);
-    const [scrollDirection, setScrollDirection] = useState<"down" | "up">("down");
-    const lastScrollY = useRef(0);
 
-    // Track scroll direction
-    useEffect(() => {
-        function onScroll() {
-            const currentY = window.scrollY;
-            setScrollDirection(currentY > lastScrollY.current ? "down" : "up");
-            lastScrollY.current = currentY;
-        }
-        window.addEventListener("scroll", onScroll, { passive: true });
-        return () => window.removeEventListener("scroll", onScroll);
-    }, []);
-
-    // Intersection Observer to track visibility
+    // Intersection Observer
     useEffect(() => {
         if (!ref.current) return;
 
         const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsVisible(entry.isIntersecting);
-            },
+            ([entry]) => setIsVisible(entry.isIntersecting),
             { threshold: 0.3 }
         );
 
         observer.observe(ref.current);
-
-        return () => {
-            if (ref.current) observer.unobserve(ref.current);
-        };
+        return () => observer.disconnect();
     }, []);
 
-    // Animation classes
     const animationClasses = isVisible
         ? "opacity-100 translate-y-0 transition-all duration-700 ease-out"
         : "opacity-0 translate-y-10 transition-all duration-700 ease-in";
@@ -56,12 +38,13 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
         >
             {/* Icon */}
             <div className="w-16 h-16 flex items-center justify-center rounded-xl bg-yellow-100 dark:bg-blue-900 flex-shrink-0">
-                <img
+                <Image
                     src={image}
                     alt={title}
                     width={40}
                     height={40}
                     className="object-contain"
+                    unoptimized // ✅ prevents _next/image
                 />
             </div>
 
