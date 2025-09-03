@@ -127,7 +127,11 @@ export default function MobileNav({ showNavs, closeNav }: Props) {
                     <ul className="space-y-4">
                         {NavLinks.map((link) => (
                             <li key={link.id}>
-                                <Link href={link.url} onClick={closeNav} className="flex items-center space-x-4 p-3 rounded-lg text-lg font-medium hover:bg-blue-800 hover:text-yellow-400 transition-all duration-200">
+                                <Link
+                                    href={link.url}
+                                    onClick={closeNav}
+                                    className="flex items-center space-x-4 p-3 rounded-lg text-lg font-medium hover:bg-blue-800 hover:text-yellow-400 transition-all duration-200"
+                                >
                                     <span className="text-xl flex-shrink-0">{link.icon}</span>
                                     <span>{link.label}</span>
                                 </Link>
@@ -140,7 +144,11 @@ export default function MobileNav({ showNavs, closeNav }: Props) {
                 <div className="p-6 border-t border-blue-800 bg-blue-950/30">
                     {user ? (
                         <div className="space-y-3">
-                            <Link href="/Profile" onClick={closeNav} className="flex items-center justify-center space-x-3 w-10 h-10 rounded-full bg-yellow-500 py-3.5 px-4 font-bold text-white text-lg hover:bg-yellow-600 transition-colors duration-200 shadow-md hover:shadow-lg hover:translate-y-[-1px] active:translate-y-0">
+                            <Link
+                                href="/Profile"
+                                onClick={closeNav}
+                                className="flex items-center justify-center space-x-3 w-full rounded-xl bg-yellow-500 py-3.5 px-4 font-bold text-white text-lg hover:bg-yellow-600 transition-colors duration-200 shadow-md hover:shadow-lg hover:translate-y-[-1px] active:translate-y-0"
+                            >
                                 {avatar && (
                                     <Image
                                         src={avatar}
