@@ -17,14 +17,14 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
     // Intersection Observer
     useEffect(() => {
         if (!ref.current) return;
-
+        const element = ref.current;
         const observer = new IntersectionObserver(
             ([entry]) => setIsVisible(entry.isIntersecting),
             { threshold: 0.3 }
         );
 
         observer.observe(ref.current);
-        return () => observer.disconnect();
+        return () => observer.unobserve(element);
     }, []);
 
     const animationClasses = isVisible
