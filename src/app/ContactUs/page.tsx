@@ -8,9 +8,11 @@ export default function ContactUsPage() {
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState<"" | "success" | "error">("");
 
-    const FACEBOOK_PAGE_ID = "61551365065183"; // your Facebook profile/page ID
+    // Replace with your own Telegram Bot token and Chat ID
+    const BOT_TOKEN = "8461799143:AAHlwmura72q0t0-O154c6GGMkAnb3PGfgQ";
+    const CHAT_ID = "5703268444";
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name || !phone || !email || !message) {
@@ -18,27 +20,36 @@ export default function ContactUsPage() {
             return;
         }
 
-        // Construct message for Messenger
-        const messengerMessage = `
-Name: ${name}
-Phone: ${phone}
-Email: ${email}
-Message: ${message}
-        `.trim();
+        const telegramMessage = `
+📩 New Contact Request:
+👤 Name: ${name}
+📞 Phone: ${phone}
+📧 Email: ${email}
+💬 Message: ${message}
+        `;
 
-        // URL encode and open Messenger link
-        const messengerURL = `https://m.me/${FACEBOOK_PAGE_ID}?ref=${encodeURIComponent(
-            messengerMessage
-        )}`;
+        try {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: telegramMessage,
+                    parse_mode: "Markdown",
+                }),
+            });
 
-        window.open(messengerURL, "_blank");
-
-        // Reset form
-        setStatus("success");
-        setName("");
-        setPhone("");
-        setEmail("");
-        setMessage("");
+            setStatus("success");
+            setName("");
+            setPhone("");
+            setEmail("");
+            setMessage("");
+        } catch (error) {
+            console.error("Telegram API error:", error);
+            setStatus("error");
+        }
     };
 
     const location =
@@ -81,7 +92,7 @@ Message: ${message}
                             Let’s Talk
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
-                            Fill out the form below and we’ll respond via Messenger.
+                            Fill out the form below and we’ll respond via Telegram.
                         </p>
 
                         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -119,7 +130,7 @@ Message: ${message}
                             ></textarea>
 
                             {status === "success" && (
-                                <p className="text-green-500 font-medium">Message ready to send via Messenger!</p>
+                                <p className="text-green-500 font-medium">Message sent to Telegram!</p>
                             )}
                             {status === "error" && (
                                 <p className="text-red-500 font-medium">
@@ -131,7 +142,7 @@ Message: ${message}
                                 type="submit"
                                 className="w-full py-3 px-5 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-[1.02] active:scale-[0.97] flex items-center justify-center gap-2"
                             >
-                                Send via Messenger
+                                Send via Telegram
                             </button>
                         </form>
                     </div>

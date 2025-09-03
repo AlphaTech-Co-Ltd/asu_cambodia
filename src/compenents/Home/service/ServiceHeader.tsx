@@ -83,7 +83,7 @@ export default function ServiceHeader() {
                     {/* Right Button Column */}
                     <div ref={rightColumn.ref} className={`${rightColumn.className} flex lg:justify-end mt-6 lg:mt-0`}>
                         <a
-                            href="#"
+                            href="/services"
                             className="w-full sm:w-auto inline-block text-center px-8 py-4 bg-blue-800 hover:bg-blue-950 text-white font-semibold text-sm sm:text-base rounded-full uppercase transition-all duration-300"
                         >
                             All Services

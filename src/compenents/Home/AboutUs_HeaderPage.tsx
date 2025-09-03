@@ -102,16 +102,6 @@ export default function AboutUs_HeaderPage() {
                             </div>
                         ))}
                     </div>
-
-                    {/* Button */}
-                    <div className="mt-10">
-                        <a
-                            href="#"
-                            className="inline-block w-full sm:w-auto text-center px-8 py-4 bg-yellow-600 hover:bg-yellow-500 transition-all duration-300 rounded-full text-white text-sm sm:text-base font-semibold uppercase"
-                        >
-                            Learn More About ASU
-                        </a>
-                    </div>
                 </motion.div>
             </div>
         </div>
