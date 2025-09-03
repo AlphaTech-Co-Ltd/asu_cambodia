@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { GoArrowUpRight } from "react-icons/go";
 
 interface CardProps {
@@ -57,7 +56,13 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
         >
             {/* Icon */}
             <div className="w-16 h-16 flex items-center justify-center rounded-xl bg-yellow-100 dark:bg-blue-900 flex-shrink-0">
-                <Image src={image} alt={title} width={40} height={40} className="object-contain" priority />
+                <img
+                    src={image}
+                    alt={title}
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                />
             </div>
 
             {/* Title + Description */}
