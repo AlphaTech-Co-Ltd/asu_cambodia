@@ -81,8 +81,7 @@ export default function Why_Choose_Us() {
                     animate={controlsRight}
                     className="flex justify-center items-center rounded-2xl overflow-hidden shadow-lg"
                 >
-                    <video
-                        src="/video/AQOxH8LbonUDnNuTBGnOCCLVe0gvk_pvp21gE8pEWWAWvqxcnZ_xkyKmYZUpt3FslS7yqbzbdy3z9Eo9yZT1QjXnavUJ6PgKcxFF9d9FZx60Cw.mp4"
+                    <video src="/video/AQOxH8LbonUDnNuTBGnOCCLVe0gvk_pvp21gE8pEWWAWvqxcnZ_xkyKmYZUpt3FslS7yqbzbdy3z9Eo9yZT1QjXnavUJ6PgKcxFF9d9FZx60Cw.mp4"
                         loop
                         playsInline
                         controls

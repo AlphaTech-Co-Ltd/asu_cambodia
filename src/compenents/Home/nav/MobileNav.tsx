@@ -22,7 +22,7 @@ export default function MobileNav({ showNavs, closeNav }: Props) {
     const avatar = user?.avatar
         ? user.avatar.startsWith("http")
             ? user.avatar
-            : `http://localhost:8081/api/republic/files/${user.avatar.replace(/^\/+/, "")}`
+            : `${process.env.NEXT_PUBLIC_API_URL}/api/republic/files/${user.avatar.replace(/^\/+/, "")}`
         : null;
 
     useEffect(() => {

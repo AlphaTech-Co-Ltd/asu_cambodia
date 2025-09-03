@@ -55,7 +55,7 @@ export default function AboutUs_HeaderPage() {
                     className="w-full rounded-2xl overflow-hidden shadow-lg relative"
                 >
                     <video
-                        src="/video/AQO6zMPKRo2bF1PklA3voyrE8IhjiPqgJg35d533o776zg_1pDqvF4hfRopiLdXp15EnMlpItYmjIn2AdMIzrurTdlXOEwEhdEzCSxHj1O70kw.mp4"
+                        src="/video/AQNLaLt4e0tSdKu_fCFD00hwB6S7yHZhzQHdeHA4hIYaiCswlXS27Z_9p4zRyR9i5UlY2mOKRyPMcOlSqcm_CCPrvfT4QTSd-NH3bS6q_FGS7w.mp4"
                         loop
                         playsInline
                         controls // Show play/pause and volume controls
