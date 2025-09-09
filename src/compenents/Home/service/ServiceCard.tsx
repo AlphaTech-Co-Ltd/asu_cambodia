@@ -44,7 +44,8 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
                     width={40}
                     height={40}
                     className="object-contain"
-                    unoptimized // ✅ prevents _next/image
+                    priority
+                    unoptimized
                 />
             </div>
 
