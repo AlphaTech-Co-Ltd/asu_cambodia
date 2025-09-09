@@ -61,28 +61,13 @@ export default function NavBar({ openNav }: Props) {
         : user?.username || "User";
 
     return (
-        <nav
-            className={`fixed w-full h-20 z-50 transition-all duration-300 ${
-                navBg ? "bg-blue-900/95 backdrop-blur-sm shadow-xl" : "bg-blue-900/80 backdrop-blur-sm"
-            }`}
-        >
+        <nav className={`fixed w-full h-20 z-50 transition-all duration-300 ${navBg ? "bg-blue-900/95 backdrop-blur-sm shadow-xl" : "bg-blue-900/80 backdrop-blur-sm"}`}>
             <div className="container mx-auto flex items-center justify-between h-full px-4 xl:px-0 max-w-7xl">
                 {/* Logo */}
                 <div className="flex items-center space-x-2">
-                    <Link
-                        href="/"
-                        aria-label="Home"
-                        className="flex items-center space-x-3 hover:opacity-90 transition-opacity group"
-                    >
+                    <Link href="/" aria-label="Home" className="flex items-center space-x-3 hover:opacity-90 transition-opacity group">
                         <div className="relative w-10 h-10 rounded-full border-2 border-white group-hover:border-yellow-400 transition-colors duration-200 overflow-hidden">
-                            <Image
-                                src="/Logo/Logo.jpg"
-                                alt="Logo"
-                                fill
-                                className="object-cover"
-                                priority
-                                sizes="40px"
-                            />
+                            <Image src="/Logo/Logo.jpg" alt="Logo" fill className="object-cover" priority sizes="40px"/>
                         </div>
                         <h1 className="text-white font-bold text-xl md:text-2xl hidden sm:block tracking-tight">
                             <span className="text-yellow-400">ASU</span> Cambodia
@@ -94,10 +79,7 @@ export default function NavBar({ openNav }: Props) {
                 <ul className="hidden lg:flex items-center space-x-1">
                     {NavLinks.map(({ id, url, label, icon }) => (
                         <li key={id}>
-                            <Link
-                                href={url}
-                                className="flex items-center space-x-2 text-white font-medium hover:text-yellow-400 transition-all duration-200 py-2 px-4 rounded-lg hover:bg-white/10 group"
-                            >
+                            <Link href={url} className="flex items-center space-x-2 text-white font-medium hover:text-yellow-400 transition-all duration-200 py-2 px-4 rounded-lg hover:bg-white/10 group">
                                 <span className="text-xl group-hover:scale-110 transition-transform">{icon}</span>
                                 <span className="text-sm font-semibold">{label}</span>
                             </Link>
@@ -107,32 +89,31 @@ export default function NavBar({ openNav }: Props) {
 
                 {/* Right controls */}
                 <div className="flex items-center space-x-4">
-                    {/* Theme & Language toggles */}
-                    <div className="hidden sm:flex items-center space-x-3">
-                        <ThemeToggle />
-                        <LanguageChange />
+                    {/* Theme & Language toggles + Mobile menu button */}
+                    <div className="flex items-center space-x-3">
+                        {/* Desktop-only toggles */}
+                        <div className="hidden sm:flex items-center space-x-3">
+                            <ThemeToggle />
+                            <LanguageChange />
+                        </div>
+
+                        {/* Mobile theme toggle */}
+                        <div className="sm:hidden">
+                            <ThemeToggle />
+                        </div>
+
+                        {/* Mobile menu button */}
+                        <button onClick={openNav} className="p-2 rounded-full lg:hidden hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Open navigation menu">
+                            <HiBars3 className="w-6 h-6 text-white hover:text-yellow-400 transition-colors" />
+                        </button>
                     </div>
 
-                    {/* Mobile menu button */}
-                    <button
-                        onClick={openNav}
-                        className="p-2 rounded-full lg:hidden hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        aria-label="Open navigation menu"
-                    >
-                        <HiBars3 className="w-6 h-6 text-white hover:text-yellow-400 transition-colors" />
-                    </button>
 
                     {/* User area */}
                     <div className="relative hidden sm:flex items-center" ref={dropdownRef}>
                         {user ? (
                             <>
-                                <button
-                                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                                    className="flex items-center focus:outline-none group"
-                                    aria-haspopup="true"
-                                    aria-expanded={dropdownOpen}
-                                    aria-label="User menu"
-                                >
+                                <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center focus:outline-none group" aria-haspopup="true" aria-expanded={dropdownOpen} aria-label="User menu">
                                     {avatar ? (
                                         <div className="relative w-10 h-10 rounded-full border-2 border-white group-hover:border-yellow-400 transition-colors duration-200 overflow-hidden">
                                             <Image

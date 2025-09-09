@@ -10,9 +10,9 @@ export default function ContactUsPage() {
 
     // Replace with your own Telegram Bot token and Chat ID
     const BOT_TOKEN = "8461799143:AAHlwmura72q0t0-O154c6GGMkAnb3PGfgQ";
-    const CHAT_ID = "5703268444";
+    const CHAT_ID = "-1002071754413";
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name || !phone || !email || !message) {
@@ -21,36 +21,41 @@ export default function ContactUsPage() {
         }
 
         const telegramMessage = `
-📩 New Contact Request:
-👤 Name: ${name}
-📞 Phone: ${phone}
-📧 Email: ${email}
-💬 Message: ${message}
-        `;
+📩 Contact Request Received
+═══════════════════
+👤 Full Name : ${name || "N/A"}
+📞 Phone     : ${phone ? `[${phone}](tel:${phone})` : "N/A"}
+📧 Email     : ${email || "N/A"}
 
-        try {
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: telegramMessage,
-                    parse_mode: "Markdown",
-                }),
+💬 Message:
+${message || "No message provided."}
+
+🕒 Submitted: ${new Date().toLocaleString()}
+═══════════════════
+`;
+
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: telegramMessage,
+                parse_mode: "Markdown",
+            }),
+        })
+            .then(() => {
+                setStatus("success");
+                setName("");
+                setPhone("");
+                setEmail("");
+                setMessage("");
+            })
+            .catch((error) => {
+                console.error("Telegram API error:", error);
+                setStatus("error");
             });
-
-            setStatus("success");
-            setName("");
-            setPhone("");
-            setEmail("");
-            setMessage("");
-        } catch (error) {
-            console.error("Telegram API error:", error);
-            setStatus("error");
-        }
     };
+
 
     const location =
         "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.8740054961794!2d104.898028!3d11.585228!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31095184941c5b05%3A0x553caa6f32f63b2f!2sCake%20Experiential%20Communications%20(Cambodia)%20Co.%2C%20Ltd.!5e0!3m2!1sen!2skh!4v1691844321120!5m2!1sen!2skh";
@@ -128,10 +133,6 @@ export default function ContactUsPage() {
                                 onChange={(e) => setMessage(e.target.value)}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                             ></textarea>
-
-                            {status === "success" && (
-                                <p className="text-green-500 font-medium">Message sent to Telegram!</p>
-                            )}
                             {status === "error" && (
                                 <p className="text-red-500 font-medium">
                                     Please fill all fields before sending.

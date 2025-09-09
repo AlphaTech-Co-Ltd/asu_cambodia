@@ -28,7 +28,7 @@ export default function RootLayout({
             <Provider>
                 <AuthProvider>
                     <ResponsiveNav/>
-                    {children}
+                        {children}
                     <FooterPage/>
                     <ScrollToTop/>
                 </AuthProvider>

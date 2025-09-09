@@ -15,7 +15,7 @@ export const NavLinks = [
     },
     {
         id: 3,
-        url: '/services',
+        url: '/Service',
         label: 'Services',
         icon: <FaServicestack />,
     },
