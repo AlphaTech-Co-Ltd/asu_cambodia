@@ -297,7 +297,7 @@ export default function VisaEducationServices() {
                                     <div>
                                         <h3 className={`text-xl font-bold mb-6 flex items-center text-gray-900 dark:text-white`}>
                                             <CheckCircle className="w-5 h-5 mr-3 text-green-500" />
-                                            What's Included
+                                            What&#39;s Included
                                         </h3>
                                         <div className="space-y-3">
                                             {activeServiceData.features.map((feature, index) => (
