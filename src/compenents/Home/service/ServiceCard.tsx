@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { GoArrowUpRight } from "react-icons/go";
 
 interface CardProps {
-    image: string;
+    image: string; // path from public folder, e.g., "/icon/visa.png"
     title: string;
     description: string;
 }
@@ -23,7 +22,7 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
             { threshold: 0.3 }
         );
 
-        observer.observe(ref.current);
+        observer.observe(element);
         return () => observer.unobserve(element);
     }, []);
 
@@ -38,14 +37,12 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
         >
             {/* Icon */}
             <div className="w-16 h-16 flex items-center justify-center rounded-xl bg-yellow-100 dark:bg-blue-900 flex-shrink-0">
-                <Image
-                    src={image}
+                <img
+                    src={image} // direct path from public folder
                     alt={title}
                     width={40}
                     height={40}
                     className="object-contain"
-                    priority
-                    unoptimized
                 />
             </div>
 

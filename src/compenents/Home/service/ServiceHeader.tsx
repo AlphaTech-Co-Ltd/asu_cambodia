@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import ServiceCard from "@/compenents/Home/service/ServiceCard";
+import React from "react";
+import ScrollDirectionCard from "@/compenents/Home/service/ServiceCard";
 
 // Scroll animation hook
 function useScrollAnimationDirection(direction: "left" | "right" | "up") {
-    const ref = useRef<HTMLDivElement>(null);
-    const [isVisible, setIsVisible] = useState(false);
-    const [scrollDirection, setScrollDirection] = useState<"down" | "up">("down");
-    const lastScrollY = useRef(0);
+    const ref = React.useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = React.useState(false);
+    const [scrollDirection, setScrollDirection] = React.useState<"down" | "up">("down");
+    const lastScrollY = React.useRef(0);
 
-    useEffect(() => {
+    React.useEffect(() => {
         function onScroll() {
             const currentY = window.scrollY;
             setScrollDirection(currentY > lastScrollY.current ? "down" : "up");
@@ -21,25 +21,20 @@ function useScrollAnimationDirection(direction: "left" | "right" | "up") {
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!ref.current) return;
 
         const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsVisible(entry.isIntersecting);
-            },
+            ([entry]) => setIsVisible(entry.isIntersecting),
             { threshold: 0.3 }
         );
 
         observer.observe(ref.current);
 
         return () => {
-            if (ref.current) {
-                observer.unobserve(ref.current);
-            }
+            if (ref.current) observer.unobserve(ref.current);
         };
     }, []);
-
 
     const baseClasses = "transition-all duration-700 ease-out";
     const visibleClasses = "opacity-100 translate-x-0 translate-y-0";
@@ -65,6 +60,27 @@ export default function ServiceHeader() {
     const rightColumn = useScrollAnimationDirection("right");
     const cardsGrid = useScrollAnimationDirection("up");
 
+    const serviceCards = [
+        {
+            image: "/icon/visa.png",
+            title: "Visa & Documentation Support",
+            description:
+                "We help you with student visa applications, embassy interview preparation, health insurance, and provide regular updates via email or SMS.",
+        },
+        {
+            image: "/icon/icons8-scholarship-100.png",
+            title: "Scholarship Opportunities",
+            description:
+                "We guarantee affordable tuition fees, assist with study packages or scholarships, and connect you with opportunities to study abroad.",
+        },
+        {
+            image: "/icon/icons8-training-100.png",
+            title: "Training Orientation",
+            description:
+                "We organize seminars, workshops, and pre-departure orientation sessions to prepare you for studying and living in Australia.",
+        },
+    ];
+
     return (
         <div className="py-16 bg-white dark:bg-gray-900">
             <div className="w-[90%] max-w-7xl mx-auto">
@@ -81,7 +97,10 @@ export default function ServiceHeader() {
                     </div>
 
                     {/* Right Button Column */}
-                    <div ref={rightColumn.ref} className={`${rightColumn.className} flex lg:justify-end mt-6 lg:mt-0`}>
+                    <div
+                        ref={rightColumn.ref}
+                        className={`${rightColumn.className} flex lg:justify-end mt-6 lg:mt-0`}
+                    >
                         <a
                             href="/Service"
                             className="w-full sm:w-auto inline-block text-center px-8 py-4 bg-blue-800 hover:bg-blue-950 text-white font-semibold text-sm sm:text-base rounded-full uppercase transition-all duration-300"
@@ -96,28 +115,9 @@ export default function ServiceHeader() {
                     ref={cardsGrid.ref}
                     className={`${cardsGrid.className} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-16`}
                 >
-                    {[
-                        {
-                            image: "/icon/visa.png",
-                            title: "Visa & Documentation Support",
-                            description:
-                                "We help you with student visa applications, embassy interview preparation, health insurance, and provide regular updates via email or SMS.",
-                        },
-                        {
-                            image: "/icon/icons8-scholarship-100.png",
-                            title: "Scholarship Opportunities",
-                            description:
-                                "We guarantee affordable tuition fees, assist with study packages or scholarships, and connect you with opportunities to study abroad.",
-                        },
-                        {
-                            image: "/icon/icons8-training-100.png",
-                            title: "Training Orientation",
-                            description:
-                                "We organize seminars, workshops, and pre-departure orientation sessions to prepare you for studying and living in Australia.",
-                        },
-                    ].map((card, index) => (
+                    {serviceCards.map((card, index) => (
                         <div key={index} className="h-full flex">
-                            <ServiceCard
+                            <ScrollDirectionCard
                                 image={card.image}
                                 title={card.title}
                                 description={card.description}
