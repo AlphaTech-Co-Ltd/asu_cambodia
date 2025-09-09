@@ -70,7 +70,7 @@ export default function FooterPage() {
                     <h2 className="text-xl font-bold">Company</h2>
                     <ul className="space-y-2">
                         <li>
-                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                            <a href="/Information" className="text-gray-200 hover:text-white transition duration-200">
                                 About Us
                             </a>
                         </li>
@@ -139,7 +139,7 @@ export default function FooterPage() {
                             </a>
                         </li>
                         <li>
-                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                            <a href="/ContactUs" className="text-gray-200 hover:text-white transition duration-200">
                                 Visit Campus
                             </a>
                         </li>

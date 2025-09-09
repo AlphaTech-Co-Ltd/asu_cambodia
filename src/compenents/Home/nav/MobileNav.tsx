@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import { NavLinks } from "@/constant_components/constants";
 import Link from "next/link";
 import { CgClose } from "react-icons/cg";
-import LanguageChange from "@/compenents/Home/Language_Change";
 import Image from "next/image";
 import { useAuth } from "@/constant_components/context/AuthContext";
 import {useRouter} from "next/navigation";
@@ -120,9 +119,6 @@ export default function MobileNav({ showNavs, closeNav }: Props) {
 
                 {/* Navigation Links with better visual hierarchy */}
                 <nav className="flex-1 overflow-y-auto py-6 px-6">
-                    <div className="mb-8">
-                        <LanguageChange />
-                    </div>
 
                     <ul className="space-y-4">
                         {NavLinks.map((link) => (

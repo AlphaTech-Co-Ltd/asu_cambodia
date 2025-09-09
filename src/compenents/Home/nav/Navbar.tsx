@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { HiBars3 } from "react-icons/hi2";
 import { useEffect, useState, useRef } from "react";
-import LanguageChange from "@/compenents/Home/Language_Change";
 import ThemeToggle from "@/constant_components/Helper/ThemeToggle";
 import { NavLinks } from "@/constant_components/constants";
 import { useAuth } from "@/constant_components/context/AuthContext";
@@ -94,7 +93,6 @@ export default function NavBar({ openNav }: Props) {
                         {/* Desktop-only toggles */}
                         <div className="hidden sm:flex items-center space-x-3">
                             <ThemeToggle />
-                            <LanguageChange />
                         </div>
 
                         {/* Mobile theme toggle */}
