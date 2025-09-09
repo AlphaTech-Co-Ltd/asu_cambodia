@@ -144,7 +144,7 @@ export default function NavBar({ openNav }: Props) {
                                         <div className="py-1">
                                             <Link
                                                 href={"/Profile"}
-                                                className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center"
+                                                className=" px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center"
                                                 onClick={() => setDropdownOpen(false)}
                                             >
                                                 <span className="mr-2">👤</span>
@@ -208,24 +208,6 @@ export default function NavBar({ openNav }: Props) {
                     </div>
                 </div>
             </div>
-
-            {/* Animation styles */}
-            <style jsx global>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                @keyframes scaleIn {
-                    from { transform: scale(0.95); opacity: 0; }
-                    to { transform: scale(1); opacity: 1; }
-                }
-                .animate-fadeIn {
-                    animation: fadeIn 0.15s ease-out forwards;
-                }
-                .animate-scaleIn {
-                    animation: scaleIn 0.15s ease-out forwards;
-                }
-            `}</style>
         </nav>
     );
 }
