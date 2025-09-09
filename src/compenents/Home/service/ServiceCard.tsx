@@ -1,30 +1,31 @@
-"use client";
-
-import React, { useEffect, useRef, useState } from "react";
-import { GoArrowUpRight } from "react-icons/go";
+import {GoArrowUpRight} from "react-icons/go";
+import {useEffect, useRef, useState} from "react";
 
 interface CardProps {
-    image: string; // path from public folder, e.g., "/icon/visa.png"
+    icon: React.ReactNode; // instead of image
     title: string;
     description: string;
 }
 
-export default function ScrollDirectionCard({ image, title, description }: CardProps) {
+export default function ScrollDirectionCard({ icon, title, description }: CardProps) {
     const ref = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(false);
 
-    // Intersection Observer
     useEffect(() => {
-        if (!ref.current) return;
-        const element = ref.current;
+        if (!ref.current) return; // guard for null
+
         const observer = new IntersectionObserver(
             ([entry]) => setIsVisible(entry.isIntersecting),
             { threshold: 0.3 }
         );
 
-        observer.observe(element);
-        return () => observer.unobserve(element);
+        observer.observe(ref.current); // ref.current is now guaranteed not null
+
+        return () => {
+            if (ref.current) observer.unobserve(ref.current);
+        };
     }, []);
+
 
     const animationClasses = isVisible
         ? "opacity-100 translate-y-0 transition-all duration-700 ease-out"
@@ -36,14 +37,8 @@ export default function ScrollDirectionCard({ image, title, description }: CardP
             className={`relative p-8 bg-white dark:bg-blue-950 rounded-2xl shadow border border-gray-100 dark:border-blue-900 flex flex-col justify-between h-full min-h-[340px] ${animationClasses}`}
         >
             {/* Icon */}
-            <div className="w-16 h-16 flex items-center justify-center rounded-xl bg-yellow-100 dark:bg-blue-900 flex-shrink-0">
-                <img
-                    src={image} // direct path from public folder
-                    alt={title}
-                    width={40}
-                    height={40}
-                    className="object-contain"
-                />
+            <div className="w-16 h-16 flex items-center justify-center rounded-xl bg-yellow-100 dark:bg-blue-900 flex-shrink-0 text-blue-950 dark:text-yellow-400">
+                {icon}
             </div>
 
             {/* Title + Description */}
