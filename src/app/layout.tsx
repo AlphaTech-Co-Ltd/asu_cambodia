@@ -30,6 +30,8 @@ export default function RootLayout({
                     <ResponsiveNav/>
                         {children}
                     <FooterPage/>
+
+
                     <ScrollToTop/>
                 </AuthProvider>
             </Provider>
