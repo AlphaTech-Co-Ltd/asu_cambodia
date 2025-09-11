@@ -85,7 +85,7 @@ export default function FooterPage() {
                             </a>
                         </li>
                         <li>
-                            <a href="#" className="text-gray-200 hover:text-white transition duration-200">
+                            <a href="/Careers" className="text-gray-200 hover:text-white transition duration-200">
                                 Careers
                             </a>
                         </li>
