@@ -122,7 +122,7 @@ export default function ProfessionalChatWidget() {
                                 </div>
                                 <h4 className="font-semibold text-slate-800 text-lg mb-2">Welcome! How can I help?</h4>
                                 <p className="text-sm text-slate-600 leading-relaxed max-w-xs">
-                                    I'm here to assist you with any questions or tasks you might have. Feel free to ask me anything.
+                                    I&#39;m here to assist you with any questions or tasks you might have. Feel free to ask me anything.
                                 </p>
                             </div>
                         )}
