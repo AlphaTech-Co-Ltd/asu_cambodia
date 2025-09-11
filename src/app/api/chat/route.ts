@@ -47,7 +47,7 @@ interface LearningData {
     }>;
 }
 
-// Initialize learning data
+// Initialize learning data (in-memory for demo - use database in production)
 const learningData: LearningData = {
     patterns: new Map(),
     userInteractions: [],
@@ -261,10 +261,9 @@ We offer cutting-edge education in technology with two main tracks:
         response: `🛠️ **We're Here to Help!**
 
 **📞 24/7 Support Channels:**
-• 💬 **Live Chat** - Instant response
-• 📧 **Email:** support@ambitiousstudents.com
-• 📞 **Phone:** +1-800-AMBITIOUS
-• 🎥 **Video Support** - Scheduled calls
+• Email: cambodiaasu@gmail.com    
+• Phone: 096-9767031 / 023-902300
+• Telegram: @Ambitious_Students_ubiquitous
 
 **👥 Student Success Team:**
 • Academic advisors
@@ -338,7 +337,7 @@ We're revolutionizing tech education with a mission to make high-quality program
         userFeedback: []
     },
 
-    // NEW: GPA Analysis for Scholarship
+    // GPA Analysis for Scholarship
     {
         id: "gpa_analysis",
         keywords: ["gpa", "grade", "scholarship", "academic", "score", "transcript", "merit", "financial aid"],
@@ -763,7 +762,7 @@ class LearningChatBot {
 
     private static getPersonalizedGreeting(context?: ConversationContext): string {
         if (context?.askedQuestions.length) {
-            return "Welcome back! I'm glad you're interested in learning more. What other questions can I answer for you? 😊";
+            return "Welcome back! I'm glad you're interested in learning more. What other questions can I answer for you?";
         }
 
         // Learn from user's preferred greeting style
@@ -774,10 +773,10 @@ class LearningChatBot {
             case "formal":
                 return "Good day! Welcome to Ambitious Students Ubiquitous. I am your AI assistant, here to provide information about our educational programs. How may I assist you today?";
             case "casual":
-                return "Hey there! 👋 Welcome to Ambitious Students! I'm your AI buddy here to help you learn about our awesome tech programs. What's on your mind?";
+                return "Hey there! Welcome to Ambitious Students! I'm your AI buddy here to help you learn about our awesome tech programs. What's on your mind?";
             case "enthusiastic":
             default:
-                return "Hello there! 🌟 Welcome to Ambitious Students Ubiquitous! I'm super excited to help you discover amazing learning opportunities. What interests you most?";
+                return "Hello there! Welcome to Ambitious Students Ubiquitous! I'm super excited to help you discover amazing learning opportunities. What interests you most?";
         }
     }
 
@@ -813,7 +812,7 @@ class LearningChatBot {
     }
 
     private static handleComplaint(message: string): string {
-        return "I'm sorry to hear you're experiencing an issue! 😔 Our support team is here to help 24/7. You can:\n\n• Use our live chat for instant assistance\n• Email us at support@ambitiousstudents.com\n• Call +1-800-AMBITIOUS\n\nWe typically resolve issues within 10 minutes. What specific problem can I help you with right now?";
+        return "I'm sorry to hear you're experiencing an issue! Our support team is here to help 24/7. You can:\n\n• Use our live chat for instant assistance\n• Email us at support@ambitiousstudents.com\n• Call +1-800-AMBITIOUS\n\nWe typically resolve issues within 10 minutes. What specific problem can I help you with right now?";
     }
 
     private static searchKnowledgeBase(message: string, context?: ConversationContext): string {
@@ -884,15 +883,15 @@ class LearningChatBot {
         );
 
         if (similarFailures.length > 2) {
-            return "I notice this is a common question that I'm still learning about! 🤔 Let me connect you with our human support team who can give you a detailed answer:\n\n📞 Call: +1-800-AMBITIOUS\n📧 Email: support@ambitiousstudents.com\n💬 Live Chat: Available 24/7\n\nIs there anything else about our programs I can help you with in the meantime?";
+            return "I notice this is a common question that I'm still learning about! Let me connect you with our human support team who can give you a detailed answer:\n\n📞 Call: +1-800-AMBITIOUS\n📧 Email: support@ambitiousstudents.com\n💬 Live Chat: Available 24/7\n\nIs there anything else about our programs I can help you with in the meantime?";
         }
 
         const fallbacks = [
-            "That's an interesting question! 🤔 I'm always learning and improving. While I don't have specific information about that right now, I'd be happy to help you with:\n\n• Course information and curriculum details\n• Admission requirements and application process\n• Pricing and payment options\n• Career support and job placement\n\nWhat would you like to know more about?",
+            "That's an interesting question! I'm always learning and improving. While I don't have specific information about that right now, I'd be happy to help you with:\n\n• Course information and curriculum details\n• Admission requirements and application process\n• Pricing and payment options\n• Career support and job placement\n\nWhat would you like to know more about?",
 
-            "Great question! I'm continuously expanding my knowledge base. 💡 Could you rephrase your question? I'm particularly knowledgeable about:\n\n• Our Software Engineering and IT programs\n• Admission process and requirements\n• Pricing and financial aid options\n• Student support services\n\nWhat specific area interests you most?",
+            "Could you rephrase your question? I'm particularly knowledgeable about:\n\n• Our Software Engineering and IT programs\n• Admission process and requirements\n• Pricing and financial aid options\n• Student support services\n\nWhat specific area interests you most?",
 
-            "I appreciate your question! While I'm still learning about that specific topic, our admissions team would be perfect to help you. 📞\n\nIn the meantime, I can share details about:\n• Program curriculum and structure\n• Student success stories\n• Pricing and scholarships\n• Getting started with applications\n\nWhat would you like to explore first?"
+            "While I'm still learning about that specific topic, our admissions team would be perfect to help you.\n\nIn the meantime, I can share details about:\n• Program curriculum and structure\n• Student success stories\n• Pricing and scholarships\n• Getting started with applications\n\nWhat would you like to explore first?"
         ];
 
         return fallbacks[Math.floor(Math.random() * fallbacks.length)];
@@ -948,51 +947,7 @@ class LearningChatBot {
             context.stage = "exploring";
         }
 
-        // Periodic learning updates
-        if (learningData.userInteractions.length % 50 === 0) {
-            this.performLearningUpdates();
-        }
-
         return response;
-    }
-
-    private static performLearningUpdates() {
-        console.log("🧠 Performing learning updates...");
-
-        // Generate new knowledge from failed queries
-        const recentFailures = learningData.failedQueries
-            .filter(fq => Date.now() - fq.timestamp.getTime() < 24 * 60 * 60 * 1000) // Last 24 hours
-            .map(fq => fq.query);
-
-        if (recentFailures.length > 5) {
-            const newKnowledge = MachineLearning.autoGenerateKnowledge(recentFailures);
-            knowledgeBase.push(...newKnowledge);
-            console.log(`📚 Generated ${newKnowledge.length} new knowledge items`);
-        }
-
-        // Update confidence scores based on user feedback
-        knowledgeBase.forEach(item => {
-            if (item.userFeedback.length > 5) {
-                const avgRating = item.userFeedback.reduce((sum, fb) => sum + fb.rating, 0) / item.userFeedback.length;
-                item.confidence = Math.min(0.98, Math.max(0.1, avgRating / 5));
-            }
-        });
-
-        // Clean up old failed queries (keep only last 1000)
-        if (learningData.failedQueries.length > 1000) {
-            learningData.failedQueries = learningData.failedQueries
-                .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-                .slice(0, 1000);
-        }
-
-        // Clean up old interactions (keep only last 5000)
-        if (learningData.userInteractions.length > 5000) {
-            learningData.userInteractions = learningData.userInteractions
-                .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-                .slice(0, 5000);
-        }
-
-        console.log("✅ Learning updates completed");
     }
 
     // Get learning statistics
@@ -1036,64 +991,11 @@ class LearningChatBot {
                 wasHelpful
             );
 
-            console.log(`📈 Learned from feedback: ${wasHelpful ? 'Positive' : 'Negative'}`);
             return true;
         }
 
         return false;
     }
-
-    // Export learning data for backup/analysis
-    public static exportLearningData() {
-        return {
-            timestamp: new Date().toISOString(),
-            stats: this.getLearningStats(),
-            patterns: Object.fromEntries(learningData.patterns),
-            knowledgeBase: knowledgeBase.map(kb => ({
-                ...kb,
-                patterns: kb.patterns.map(p => p.source) // Convert RegExp to string
-            }))
-        };
-    }
-
-    public static importLearningData(data: unknown) {
-        try {
-            if (typeof data !== "object" || data === null) {
-                throw new Error("Invalid data format");
-            }
-
-            const d = data as Record<string, unknown>;
-
-            if (d.patterns && typeof d.patterns === "object") {
-                learningData.patterns = new Map(Object.entries(d.patterns));
-            }
-
-            if (Array.isArray(d.knowledgeBase)) {
-                // Restore RegExp patterns safely
-                const kb = d.knowledgeBase.map((item) => {
-                    if (typeof item === "object" && item !== null && "patterns" in item) {
-                        const patterns = (item as Record<string, unknown>).patterns;
-                        if (Array.isArray(patterns)) {
-                            return {
-                                ...item,
-                                patterns: patterns.map((p) => new RegExp(String(p))),
-                            };
-                        }
-                    }
-                    return item;
-                });
-
-                knowledgeBase.splice(0, knowledgeBase.length, ...kb);
-            }
-
-            console.log("📥 Learning data imported successfully");
-            return true;
-        } catch (error) {
-            console.error("❌ Error importing learning data:", error);
-            return false;
-        }
-    }
-
 }
 
 // Enhanced API handler with learning capabilities
@@ -1121,16 +1023,11 @@ export async function POST(req: Request) {
                     stats: LearningChatBot.getLearningStats()
                 });
 
-            case 'export':
-                return NextResponse.json({
-                    learningData: LearningChatBot.exportLearningData()
-                });
-
             default:
                 // Regular chat processing
                 if (!message?.trim()) {
                     return NextResponse.json({
-                        reply: "I didn't receive your message. Could you please try again? 😊",
+                        reply: "I didn't receive your message. Could you please try again?",
                         error: "empty_message"
                     });
                 }
@@ -1169,32 +1066,9 @@ export async function POST(req: Request) {
         console.error("Chat API Error:", error);
 
         return NextResponse.json({
-            reply: "I'm experiencing some technical difficulties right now. However, I'm continuously learning and improving! Please try again in a moment, or contact our support team for immediate assistance! 🛠️",
+            reply: "I'm experiencing some technical difficulties right now. However, I'm continuously learning and improving! Please try again in a moment, or contact our support team for immediate assistance!",
             error: "server_error",
             learningActive: true
         }, { status: 500 });
     }
 }
-
-// Utility function to initialize learning system
-export function initializeLearningSystem() {
-    console.log("🚀 Initializing Learning System...");
-
-    // Load any existing learning data (in real implementation, this would be from database)
-    const existingData = null; // Would load from persistent storage
-
-    if (existingData) {
-        LearningChatBot.importLearningData(existingData);
-    }
-
-    // Start periodic learning updates every hour
-    setInterval(() => {
-        console.log("⏰ Scheduled learning update...");
-        // In real implementation, trigger learning updates
-    }, 60 * 60 * 1000); // 1 hour
-
-    console.log("✅ Learning System Initialized");
-}
-
-// Auto-initialize when module loads
-initializeLearningSystem();
