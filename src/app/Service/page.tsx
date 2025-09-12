@@ -25,7 +25,7 @@ export default function VisaEducationServices() {
                 "Visa Status Tracking and Follow-up Support"
             ],
             benefits: [
-                "99% Visa Approval Success Rate",
+                "90% Visa Approval Success Rate",
                 "Personalized One-on-One Consultation",
                 "Post-Visa Arrival Support Services",
                 "Emergency Assistance During Process"
@@ -92,10 +92,10 @@ export default function VisaEducationServices() {
     ];
 
     const stats = [
-        { icon: <Users className="w-6 h-6" />, label: "Students Placed", value: "2,000+", text:"Students" },
-        { icon: <Award className="w-6 h-6" />, label: "Success Rate", value: "99%", text:"Rate" },
-        { icon: <Globe className="w-6 h-6" />, label: "Partner Universities", value: "BIU | RUPP", text: "Partner Universities" },
-        { icon: <Shield className="w-6 h-6" />, label: "Years Experience", value: "6+" }
+        { icon: <Users className="w-6 h-6" />, label: "Students Placed", value: "100+", text:"Students" },
+        { icon: <Award className="w-6 h-6" />, label: "Success Rate", value: "90%", text:"Rate" },
+        { icon: <Globe className="w-6 h-6" />, label: "Partner Universities", value: "RUPP | BETEI", text: "Partner Universities" },
+        { icon: <Shield className="w-6 h-6" />, label: "Years Experience", value: "3+" }
     ];
 
     useEffect(() => {
@@ -347,11 +347,11 @@ export default function VisaEducationServices() {
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                <span className="text-gray-700 dark:text-gray-400">99% success rate</span>
+                                                <span className="text-gray-700 dark:text-gray-400">90% success rate</span>
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                <span className="text-gray-700 dark:text-gray-400">6+ years experience</span>
+                                                <span className="text-gray-700 dark:text-gray-400">3+ years experience</span>
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
