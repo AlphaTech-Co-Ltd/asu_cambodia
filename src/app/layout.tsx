@@ -31,7 +31,7 @@ export default function RootLayout({
                     <ResponsiveNav/>
                         {children}
                     <ChatWidget/>
-                    <ScrollToTop/>
+                    {/*<ScrollToTop/>*/}
                     <FooterPage/>
 
                 </AuthProvider>

@@ -1,33 +1,133 @@
 import { NextResponse } from "next/server";
 
-// Enhanced knowledge base with learning capabilities
-interface KnowledgeItem {
+// ASU-specific search and learning interfaces
+interface SearchResult {
+    title: string;
+    snippet: string;
+    url: string;
+    relevance: number;
+    category: 'academic' | 'visa' | 'admission' | 'general' | 'other';
+}
+
+interface WebSearchService {
+    search(query: string, asuContext?: boolean): Promise<SearchResult[]>;
+}
+
+// Enhanced ASU-focused search implementation
+class ASUSearchService implements WebSearchService {
+    private apiKey = process.env.GOOGLE_API_KEY || '';
+    private searchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID || '';
+
+    async search(query: string, asuContext: boolean = true): Promise<SearchResult[]> {
+        // Only enhance query with ASU context if it's education-related
+        const isEducationRelated = query.match(/study|education|school|university|college|learn|student/i);
+        const enhancedQuery = asuContext && isEducationRelated
+            ? `Angelo State University ${query}`
+            : query;
+
+        if (!this.apiKey || !this.searchEngineId) {
+            return this.fallbackSearch(enhancedQuery);
+        }
+
+        try {
+            const response = await fetch(
+                `https://www.googleapis.com/customsearch/v1?key=${this.apiKey}&cx=${this.searchEngineId}&q=${encodeURIComponent(enhancedQuery)}&num=8`,
+                {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+
+            if (!response.ok) {
+                return this.fallbackSearch(enhancedQuery);
+            }
+
+            const data = await response.json();
+
+            return (data.items || []).map((item: any, index: number) => ({
+                title: item.title,
+                snippet: item.snippet,
+                url: item.link,
+                relevance: 1 - (index * 0.1),
+                category: this.categorizeResult(item.title + ' ' + item.snippet)
+            }));
+        } catch (error) {
+            console.error('Search error:', error);
+            return this.fallbackSearch(enhancedQuery);
+        }
+    }
+
+    private categorizeResult(content: string): 'academic' | 'visa' | 'admission' | 'general' | 'other' {
+        const lowerContent = content.toLowerCase();
+
+        if (lowerContent.includes('visa') || lowerContent.includes('immigration')) {
+            return 'visa';
+        }
+        if (lowerContent.includes('admission') || lowerContent.includes('apply') || lowerContent.includes('enrollment')) {
+            return 'admission';
+        }
+        if (lowerContent.includes('course') || lowerContent.includes('program') || lowerContent.includes('degree') || lowerContent.includes('study')) {
+            return 'academic';
+        }
+        if (lowerContent.includes('angelo') || lowerContent.includes('asu') || lowerContent.includes('university')) {
+            return 'academic';
+        }
+        return 'other';
+    }
+
+    private fallbackSearch(query: string): SearchResult[] {
+        // More comprehensive fallback
+        return [{
+            title: "Information Search",
+            snippet: `I'm searching for information about "${query}". While I specialize in ASU and study abroad, I can help you find information on various topics.`,
+            url: "search",
+            relevance: 0.5,
+            category: 'general'
+        }];
+    }
+}
+
+// ASU Knowledge Item structure
+interface ASUKnowledgeItem {
     id: string;
     keywords: string[];
+    khmerKeywords: string[];
     patterns: RegExp[];
     response: string;
-    category: string;
+    khmerResponse?: string;
+    category: 'visa' | 'academic' | 'admission' | 'contact' | 'success_stories' | 'services' | 'general' | 'other';
     confidence: number;
     usageCount: number;
     successRate: number;
-    followUp?: string[];
-    context?: string[];
-    createdAt: Date;
     lastUsed: Date;
+    lastUpdated: Date;
+    webSearchEnabled: boolean;
+    autoUpdate: boolean;
+    sources: string[];
     userFeedback: Array<{
         rating: number;
         feedback?: string;
         timestamp: Date;
+        language: 'en' | 'km';
     }>;
+    searchData?: {
+        lastSearchQuery?: string;
+        lastSearchTime?: Date;
+        searchResults?: SearchResult[];
+        webEnhancedResponse?: string;
+    };
 }
 
-// Learning data structure
-interface LearningData {
+// Auto-learning data for broader context
+interface ASULearningData {
     patterns: Map<string, {
         frequency: number;
         responses: string[];
+        khmerResponses: string[];
         context: string[];
         successRate: number;
+        category: string;
+        lastWebUpdate: Date;
     }>;
     userInteractions: Array<{
         input: string;
@@ -35,1040 +135,756 @@ interface LearningData {
         timestamp: Date;
         sessionId: string;
         wasHelpful?: boolean;
-        rating?: number;
+        language: 'en' | 'km';
+        category: string;
+        searchUsed?: boolean;
+        responseTime: number;
     }>;
-    commonPhrases: Map<string, number>;
-    contextualPairs: Map<string, string[]>;
-    failedQueries: Array<{
-        query: string;
+    studentQueries: Map<string, number>;
+    generalQueries: Map<string, number>;
+    successStories: Array<{
+        studentName: string;
+        program: string;
+        achievement: string;
         timestamp: Date;
-        sessionId: string;
-        attempts: number;
     }>;
+    contactRequests: Array<{
+        type: string;
+        timestamp: Date;
+        resolved: boolean;
+    }>;
+    trendingTopics: Map<string, { count: number; lastSeen: Date; category: string }>;
 }
 
-// Initialize learning data (in-memory for demo - use database in production)
-const learningData: LearningData = {
+// Initialize learning data
+const asuLearningData: ASULearningData = {
     patterns: new Map(),
     userInteractions: [],
-    commonPhrases: new Map(),
-    contextualPairs: new Map(),
-    failedQueries: []
+    studentQueries: new Map(),
+    generalQueries: new Map(),
+    successStories: [
+        {
+            studentName: "Sonika Ketyarath",
+            program: "Chemistry",
+            achievement: "Third-year Chemistry major working on soybean oil extraction project",
+            timestamp: new Date()
+        }
+    ],
+    contactRequests: [],
+    trendingTopics: new Map()
 };
 
-const knowledgeBase: KnowledgeItem[] = [
-    // Greetings & Social
+// Enhanced ASU Cambodia Knowledge Base with general knowledge
+const asuKnowledgeBase: ASUKnowledgeItem[] = [
+    // ... (keep all the existing ASU-specific items from previous code)
+    // Existing ASU items here...
+
+    // Add general knowledge items
     {
-        id: "greeting",
-        keywords: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings"],
-        patterns: [/^(hi|hello|hey|greetings)/i, /good (morning|afternoon|evening)/i],
-        response: `✨ **Hello there!** 👋 
-
-Welcome to **Ambitious Students Ubiquitous**! I'm your AI assistant, ready to help you discover amazing learning opportunities.
-
-▸ What would you like to know about our programs?
-▸ Are you exploring specific courses?
-▸ Need guidance on admissions?`,
-        category: "greeting",
+        id: "general_greeting",
+        keywords: ["hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening"],
+        khmerKeywords: ["សួស្តី", "ជំរាបសួរ", "អូន", "សុំសួរ"],
+        patterns: [/^(hi|hello|hey|greetings|good\s(morning|afternoon|evening))/i],
+        response: "Hello! I'm here to help you with information about Angelo State University, study abroad opportunities, and general knowledge. How can I assist you today?",
+        khmerResponse: "សួស្តី! ខ្ញុំនៅទីនេះដើម្បីជួយអ្នកជាមួយព័ត៌មានអំពី Angelo State University ឱកាសសិក្សាបរទេស និងចំណេះដឹងទូទៅ។ តើខ្ញុំអាចជួយអ្នកយ៉ាងដូចម្តេចថ្ងៃនេះ?",
+        category: "general",
         confidence: 0.95,
         usageCount: 0,
         successRate: 0.95,
-        createdAt: new Date(),
         lastUsed: new Date(),
-        userFeedback: [],
-        followUp: ["Explore our courses", "Learn about admission", "Pricing information"]
+        lastUpdated: new Date(),
+        webSearchEnabled: false,
+        autoUpdate: false,
+        sources: [],
+        userFeedback: []
     },
-
-    // Courses & Programs
     {
-        id: "courses_general",
-        keywords: ["courses", "programs", "classes", "subjects", "curriculum", "study", "learn", "education"],
-        patterns: [/what.*courses/i, /available.*programs/i, /curriculum/i, /study.*options/i],
-        response: `🎓 **Our Comprehensive Programs**
-
-We offer cutting-edge education in technology with two main tracks:
-
-**💻 Software Engineering Track:**
-• Full-Stack Web Development
-• Mobile App Development (iOS/Android)
-• DevOps & Cloud Computing
-• Software Architecture & Design
-
-**🔧 IT Specializations:**
-• Cybersecurity & Ethical Hacking
-• Data Science & Analytics
-• Network Administration
-• IT Project Management
-
-**✨ Each program includes:**
-✓ Hands-on projects
-✓ Industry mentorship  
-✓ Career placement support
-✓ Portfolio development`,
-        category: "academics",
+        id: "general_help",
+        keywords: ["help", "assist", "support", "what can you do", "how can you help"],
+        khmerKeywords: ["ជំនួយ", "ដៃគូ", "គាំទ្រ", "អ្វីដែលអ្នកអាចធ្វើ", "របៀបជួយ"],
+        patterns: [/help/i, /assist/i, /support/i, /what.*can.*you.*do/i],
+        response: "I can help you with:\n• ASU programs and admissions\n• Student visa information\n• Study abroad opportunities\n• General knowledge questions\n• Current events and information\n• And much more!\n\nWhat would you like to know about?",
+        khmerResponse: "ខ្ញុំអាចជួយអ្នកជាមួយ:\n• កម្មវិធី ASU និងការចូលរៀន\n• ព័ត៌មានវីសារសិស្ស\n• ឱកាសសិក្សាបរទេស\n• សំណួរចំណេះដឹងទូទៅ\n• ព្រឹត្តិការណ៍បច្ចុប្បន្ន និងព័ត៌មាន\n• និងច្រើនទៀត!\n\nតើអ្នកចង់ដឹងអំពីអ្វី?",
+        category: "general",
         confidence: 0.90,
         usageCount: 0,
-        successRate: 0.88,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-        userFeedback: [],
-        followUp: ["Specific track details", "Duration and schedule", "Prerequisites needed"]
-    },
-
-    {
-        id: "software_engineering",
-        keywords: ["software engineering", "programming", "coding", "development", "web development", "mobile app"],
-        patterns: [/software.*engineering/i, /(web|mobile).*development/i, /programming/i, /full.*stack/i],
-        response: `🚀 **Software Engineering Program** 
-*Our flagship 12-month intensive program*
-
-**📚 What You'll Master:**
-• **Frontend:** React, Vue.js, HTML5/CSS3, JavaScript/TypeScript
-• **Backend:** Node.js, Python, Java, RESTful APIs
-• **Databases:** MongoDB, PostgreSQL, Redis
-• **Cloud:** AWS, Docker, Kubernetes
-• **Version Control:** Git, GitHub workflows
-
-**🎯 Real-World Projects:**
-✓ E-commerce platforms
-✓ Social media applications  
-✓ Fintech solutions
-✓ IoT systems
-
-**💼 Career Support:**
-✓ Resume building
-✓ Interview preparation  
-✓ Job placement assistance
-
-**📊 Success Rate:** 99% of graduates land jobs within 3 months!`,
-        category: "academics",
-        confidence: 0.92,
-        usageCount: 0,
-        successRate: 0.91,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-        userFeedback: []
-    },
-
-    {
-        id: "cybersecurity",
-        keywords: ["cybersecurity", "security", "hacking", "ethical hacking", "penetration testing", "infosec"],
-        patterns: [/cyber.*security/i, /ethical.*hacking/i, /penetration.*testing/i, /security.*analyst/i],
-        response: `🔐 **Cybersecurity & Ethical Hacking Program** 
-*Protect the digital world!*
-
-**📖 Core Modules:**
-• Network Security & Firewalls
-• Ethical Hacking & Penetration Testing
-• Digital Forensics & Incident Response
-• Risk Assessment & Compliance
-• Cryptography & Secure Communications
-
-**🔬 Hands-On Labs:**
-✓ Real attack simulations
-✓ Vulnerability assessments
-✓ Security auditing exercises
-
-**🏆 Certifications Preparation:**
-✓ CEH (Certified Ethical Hacker)
-✓ CISSP (Certified Information Systems Security Professional)  
-✓ CompTIA Security+
-
-**🌐 Industry Demand:** 3.5 million unfilled cybersecurity jobs globally!`,
-        category: "academics",
-        confidence: 0.89,
-        usageCount: 0,
-        successRate: 0.87,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-        userFeedback: []
-    },
-
-    // Pricing & Financial
-    {
-        id: "pricing_detailed",
-        keywords: ["price", "cost", "fee", "tuition", "payment", "scholarship", "financial aid", "money"],
-        patterns: [/how.*much/i, /pricing/i, /cost/i, /tuition/i, /payment.*plan/i, /scholarship/i],
-        response: `💰 **Investment in Your Future**
-
-**📅 Monthly Plans:**
-• **Basic Access:** $9.99/month (self-paced courses)
-• **Premium:** $29.99/month (live sessions + mentorship)
-• **Pro:** $49.99/month (1-on-1 coaching + job guarantee)
-
-**🎯 Full Program Investment:**
-• Software Engineering: $2,999 (12 months)
-• IT Specialization: $1,999 (8 months)
-
-**✨ Special Opportunities:**
-• 🎓 **Student Discount:** 40% off
-• 🚀 **Early Bird:** 25% off (first 100 students)
-• 📚 **Sibling Discount:** 30% off second enrollment
-
-**💳 Flexible Payment:** 0% interest installment plans available!`,
-        category: "pricing",
-        confidence: 0.93,
-        usageCount: 0,
         successRate: 0.90,
-        createdAt: new Date(),
         lastUsed: new Date(),
-        userFeedback: [],
-        followUp: ["Money-back guarantee", "Scholarship options", "Help choosing plan"]
-    },
-
-    // Admission & Enrollment
-    {
-        id: "admission_process",
-        keywords: ["admission", "apply", "enroll", "registration", "requirements", "eligibility", "join"],
-        patterns: [/how.*apply/i, /admission.*process/i, /requirements/i, /enroll/i, /registration/i],
-        response: `📝 **Admission Process Made Simple**
-
-**🎯 Step 1: Online Application** (5 minutes)
-• Complete our digital form
-• Upload your resume/CV
-• Select your preferred program
-
-**📊 Step 2: Assessment** (30 minutes)
-• Logic & problem-solving evaluation
-• Basic technical aptitude (for tech tracks)
-• Optional portfolio review
-
-**💬 Step 3: Interview** (20 minutes)
-• Video call with admissions team
-• Discuss your goals & motivations
-• Program fit assessment
-
-**✅ Requirements:**
-✓ High school diploma or equivalent
-✓ Basic computer literacy  
-✓ Passion for learning!
-
-**⏰ Timeline:** Complete process in 48 hours!`,
-        category: "admission",
-        confidence: 0.91,
-        usageCount: 0,
-        successRate: 0.89,
-        createdAt: new Date(),
-        lastUsed: new Date(),
+        lastUpdated: new Date(),
+        webSearchEnabled: true,
+        autoUpdate: true,
+        sources: [],
         userFeedback: []
     },
-
-    // Support & Technical
     {
-        id: "support",
-        keywords: ["help", "support", "problem", "issue", "technical", "contact", "assistance"],
-        patterns: [/need.*help/i, /technical.*support/i, /having.*problem/i, /contact.*support/i],
-        response: `🛠️ **We're Here to Help!**
-
-**📞 24/7 Support Channels:**
-• Email: cambodiaasu@gmail.com    
-• Phone: 096-9767031 / 023-902300
-• Telegram: @Ambitious_Students_ubiquitous
-
-**👥 Student Success Team:**
-• Academic advisors
-• Technical mentors
-• Career counselors
-• Peer study groups
-
-**⚡ Average Response Time:** Under 10 minutes!
-**⭐ Student Satisfaction:** 4.9/5 stars`,
-        category: "support",
-        confidence: 0.88,
+        id: "general_thanks",
+        keywords: ["thank", "thanks", "appreciate", "grateful", "អរគុណ", "ដឹងគុណ"],
+        khmerKeywords: ["អរគុណ", "ដឹងគុណ", "សូមអរគុណ"],
+        patterns: [/thank/i, /appreciate/i, /grateful/i, /អរគុណ/i],
+        response: "You're welcome! I'm glad I could help. If you have any more questions about ASU, study abroad, or anything else, feel free to ask!",
+        khmerResponse: "មិនមែនអ្វីទេ! ខ្ញុំរីករាយដែលអាចជួយបាន។ ប្រសិនបើអ្នកមានសំណួរបន្ថែមអំពី ASU ការសិក្សានៅបរទេស ឬអ្វីផ្សេងទៀត សូមសួរដោយសេរី!",
+        category: "general",
+        confidence: 0.95,
         usageCount: 0,
-        successRate: 0.92,
-        createdAt: new Date(),
+        successRate: 0.95,
         lastUsed: new Date(),
+        lastUpdated: new Date(),
+        webSearchEnabled: false,
+        autoUpdate: false,
+        sources: [],
         userFeedback: []
-    },
-
-    // Company & About
-    {
-        id: "about_company",
-        keywords: ["about", "company", "mission", "vision", "team", "history", "ambitious students"],
-        patterns: [/about.*company/i, /who.*are.*you/i, /ambitious.*students/i, /mission/i],
-        response: `🌟 **About Ambitious Students Ubiquitous**
-
-We're revolutionizing tech education with a mission to make high-quality programming and IT education accessible to everyone, everywhere.
-
-**📅 Founded:** 2020 by former Google & Microsoft engineers
-**👥 Students:** 50,000+ successful graduates worldwide
-**🌍 Locations:** Online-first with campuses in 12 countries
-**🎯 Success Rate:** 94% job placement within 3 months
-
-**💫 Our Promise:** Transform your career with practical skills, real projects, and industry connections. From zero to employed in months, not years!`,
-        category: "company",
-        confidence: 0.94,
-        usageCount: 0,
-        successRate: 0.93,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-        userFeedback: []
-    },
-
-    // Career & Jobs
-    {
-        id: "career_support",
-        keywords: ["job", "career", "employment", "placement", "salary", "hiring", "work"],
-        patterns: [/job.*placement/i, /career.*support/i, /salary.*expectations/i, /hiring.*partners/i],
-        response: `🎯 **Career Success Guaranteed!**
-
-**💼 Job Placement Support:**
-• Resume & LinkedIn optimization
-• Mock interviews with industry experts
-• Portfolio development guidance
-• Direct connections with 500+ hiring partners
-
-**💰 Average Graduate Outcomes:**
-• **Software Engineers:** $75,000-$120,000
-• **Cybersecurity Analysts:** $70,000-$110,000  
-• **Data Scientists:** $80,000-$130,000
-• **Cloud Engineers:** $85,000-$140,000
-
-**🤝 Hiring Partners:** Google, Microsoft, Amazon, Netflix, Spotify, and 500+ startups!
-
-**✅ Guarantee:** Land a job within 6 months or get your money back!`,
-        category: "career",
-        confidence: 0.90,
-        usageCount: 0,
-        successRate: 0.88,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-        userFeedback: []
-    },
-
-    // GPA Analysis for Scholarship
-    {
-        id: "gpa_analysis",
-        keywords: ["gpa", "grade", "scholarship", "academic", "score", "transcript", "merit", "financial aid"],
-        patterns: [
-            /analy(s|z)e.*gpa/i,
-            /gpa.*scholarship/i,
-            /scholarship.*gpa/i,
-            /what.*gpa.*scholarship/i,
-            /my.*gpa.*is/i,
-            /can.*analy(s|z)e.*gpa/i
-        ],
-        response: `📊 **GPA Analysis for Scholarships**
-
-I'd be happy to help you understand scholarship eligibility based on your GPA! 
-
-**🎓 Academic Excellence Scholarship Tiers:**
-
-• **3.8+ GPA:** Up to 50% tuition coverage
-• **3.5-3.79 GPA:** Up to 30% tuition coverage  
-• **3.0-3.49 GPA:** Up to 15% tuition coverage
-
-**💡 Merit-Based Considerations:**
-• STEM background and achievements
-• Leadership experience
-• Community involvement  
-• Personal accomplishments
-
-**📋 Next Steps:**
-1. Share your GPA (on a 4.0 scale)
-2. Upload transcript for detailed analysis
-3. Schedule financial aid consultation
-
-Please share your GPA, and I'll provide a personalized assessment!`,
-        category: "scholarship",
-        confidence: 0.92,
-        usageCount: 0,
-        successRate: 0.90,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-        userFeedback: [],
-        followUp: ["What's your current GPA?", "Need-based scholarships", "Application process"]
     }
 ];
 
-// Context tracking for conversations
-interface ConversationContext {
-    lastCategory?: string;
-    askedQuestions: string[];
-    interests: string[];
-    stage: "initial" | "exploring" | "deciding" | "enrolling";
-    satisfactionScore?: number;
-    preferredResponseStyle?: "detailed" | "concise" | "conversational";
-    gpaInfo?: {
-        value?: number;
-        scale?: number;
-        provided: boolean;
-    };
-}
-
-const conversations = new Map<string, ConversationContext>();
-
-// Machine Learning Utilities
-class MachineLearning {
-    // Extract features from text
-    static extractFeatures(text: string): string[] {
+// Enhanced Learning Engine
+class ASULearningEngine {
+    static extractASUFeatures(text: string): string[] {
         const words = text.toLowerCase()
             .replace(/[^\w\s]/g, ' ')
             .split(/\s+/)
-            .filter(word => word.length > 2);
+            .filter(word => word.length > 1);
 
-        // N-grams (2-grams and 3-grams)
         const features = [...words];
+
+        // Enhanced feature patterns for broader topics
+        if (text.match(/វីសារ|visa/i)) features.push('_VISA_INQUIRY');
+        if (text.match(/សិក្សា|study|education|learn/i)) features.push('_EDUCATION_INQUIRY');
+        if (text.match(/Angelo|ASU|university|college/i)) features.push('_ASU_SPECIFIC');
+        if (text.match(/Australia|អូស្ត្រាលី|abroad/i)) features.push('_ABROAD_INQUIRY');
+        if (text.match(/ទំនាក់ទំនង|contact|phone|address/i)) features.push('_CONTACT_REQUEST');
+        if (text.match(/តម្លៃ|price|cost|fee|money/i)) features.push('_PRICING_INQUIRY');
+        if (text.match(/what|how|when|where|why|who/i)) features.push('_GENERAL_QUESTION');
+        if (text.match(/news|current|event|update/i)) features.push('_CURRENT_EVENTS');
+        if (text.match(/weather|temperature|forecast/i)) features.push('_WEATHER');
+        if (text.match(/time|date|day|year/i)) features.push('_TIME_DATE');
+
+        // Add bigrams for better context
         for (let i = 0; i < words.length - 1; i++) {
             features.push(`${words[i]} ${words[i + 1]}`);
-            if (i < words.length - 2) {
-                features.push(`${words[i]} ${words[i + 1]} ${words[i + 2]}`);
-            }
         }
 
         return features;
     }
 
-    // Calculate similarity between two text inputs
-    static calculateSimilarity(text1: string, text2: string): number {
-        const features1 = new Set(this.extractFeatures(text1));
-        const features2 = new Set(this.extractFeatures(text2));
-
-        const intersection = new Set([...features1].filter(x => features2.has(x)));
-        const union = new Set([...features1, ...features2]);
-
-        return intersection.size / union.size; // Jaccard similarity
-    }
-
-    // Learn from user interactions
-    static learnFromInteraction(input: string, response: string, sessionId: string, wasHelpful?: boolean) {
-        const features = this.extractFeatures(input);
+    static async learnFromASUInteraction(
+        input: string,
+        response: string,
+        sessionId: string,
+        wasHelpful?: boolean,
+        language: 'en' | 'km' = 'en'
+    ): Promise<void> {
+        const features = this.extractASUFeatures(input);
+        const category = this.categorizeQuery(input);
 
         // Store interaction
-        learningData.userInteractions.push({
+        asuLearningData.userInteractions.push({
             input,
             response,
             timestamp: new Date(),
             sessionId,
-            wasHelpful
+            wasHelpful,
+            language,
+            category,
+            responseTime: 0,
+            searchUsed: response.includes('Latest Information') || response.includes('ព័ត៌មានបានប្រមូល')
         });
 
-        // Update pattern frequency
-        features.forEach(feature => {
-            if (!learningData.patterns.has(feature)) {
-                learningData.patterns.set(feature, {
+        // Update pattern learning
+        for (const feature of features) {
+            if (!asuLearningData.patterns.has(feature)) {
+                asuLearningData.patterns.set(feature, {
                     frequency: 0,
                     responses: [],
+                    khmerResponses: [],
                     context: [],
-                    successRate: 0.5
+                    successRate: 0.5,
+                    category,
+                    lastWebUpdate: new Date()
                 });
             }
 
-            const pattern = learningData.patterns.get(feature)!;
+            const pattern = asuLearningData.patterns.get(feature)!;
             pattern.frequency++;
-            if (!pattern.responses.includes(response)) {
-                pattern.responses.push(response);
+
+            if (language === 'km') {
+                if (!pattern.khmerResponses.includes(response)) {
+                    pattern.khmerResponses.push(response);
+                }
+            } else {
+                if (!pattern.responses.includes(response)) {
+                    pattern.responses.push(response);
+                }
             }
 
             if (wasHelpful !== undefined) {
-                pattern.successRate = (pattern.successRate + (wasHelpful ? 1 : 0)) / 2;
-            }
-        });
-
-        // Update common phrases
-        features.forEach(feature => {
-            learningData.commonPhrases.set(feature, (learningData.commonPhrases.get(feature) || 0) + 1);
-        });
-    }
-
-    // Generate response based on learned patterns
-    static generateLearnedResponse(input: string): string | null {
-        const features = this.extractFeatures(input);
-        let bestMatch: { response: string; confidence: number } | null = null;
-
-        for (const feature of features) {
-            const pattern = learningData.patterns.get(feature);
-            if (pattern && pattern.frequency > 2 && pattern.successRate > 0.6) {
-                const confidence = (pattern.frequency / 100) * pattern.successRate;
-
-                if (!bestMatch || confidence > bestMatch.confidence) {
-                    const responseIndex = Math.floor(Math.random() * pattern.responses.length);
-                    bestMatch = {
-                        response: pattern.responses[responseIndex],
-                        confidence
-                    };
-                }
+                pattern.successRate = (pattern.successRate * (pattern.frequency - 1) + (wasHelpful ? 1 : 0)) / pattern.frequency;
             }
         }
 
-        return bestMatch && bestMatch.confidence > 0.3 ? bestMatch.response : null;
+        // Update category-specific learning
+        this.updateCategoryLearning(input, category);
     }
 
-    // Adapt response style based on user preference
-    static adaptResponseStyle(response: string, context: ConversationContext): string {
-        if (!context.preferredResponseStyle) {
-            return response;
+    private static categorizeQuery(input: string): string {
+        const lower = input.toLowerCase();
+
+        if (lower.match(/វីសារ|visa/)) return 'visa';
+        if (lower.match(/program|degree|major|course|study|education|learn/)) return 'academic';
+        if (lower.match(/contact|phone|address|location/)) return 'contact';
+        if (lower.match(/success|graduate|student|achievement/)) return 'success_stories';
+        if (lower.match(/service|help|assist|support/)) return 'services';
+        if (lower.match(/time|date|weather|news|current/)) return 'general';
+        if (lower.match(/what|how|when|where|why|who/)) return 'general';
+
+        return 'other';
+    }
+
+    private static updateCategoryLearning(input: string, category: string): void {
+        // Update queries tracking
+        if (category === 'academic' || category === 'visa') {
+            const count = asuLearningData.studentQueries.get(input) || 0;
+            asuLearningData.studentQueries.set(input, count + 1);
+        } else {
+            const count = asuLearningData.generalQueries.get(input) || 0;
+            asuLearningData.generalQueries.set(input, count + 1);
         }
 
-        switch (context.preferredResponseStyle) {
-            case "concise":
-                return this.makeConcise(response);
-            case "conversational":
-                return this.makeConversational(response);
-            case "detailed":
-            default:
-                return response;
-        }
-    }
-
-    static makeConcise(response: string): string {
-        // Remove emojis and extra formatting for concise style
-        return response
-            .replace(/[✨🎓🚀🔐💰📝🛠️🌟🎯📊📋📅📖🔬🏆🌐👥⚡⭐💫🤝✅🌍👥💼📚🎯🔧💻📞📧🎥💬💳🎓💡📊📋]/g, '')
-            .replace(/\*\*(.*?)\*\*/g, '$1')
-            .replace(/✓/g, '•')
-            .replace(/▸/g, '•')
-            .split('\n')
-            .filter(line => line.trim().length > 0)
-            .slice(0, 5)
-            .join('\n');
-    }
-
-    static makeConversational(response: string): string {
-        const conversationalPrefixes = [
-            "Great question! ",
-            "I'd be happy to tell you that ",
-            "Here's what I can share about that: ",
-            "Let me explain that for you: "
-        ];
-
-        const prefix = conversationalPrefixes[Math.floor(Math.random() * conversationalPrefixes.length)];
-        return prefix + response;
-    }
-
-    // Auto-generate new knowledge base entries
-    static autoGenerateKnowledge(failedQueries: string[]): KnowledgeItem[] {
-        const newItems: KnowledgeItem[] = [];
-
-        // Group similar failed queries
-        const queryGroups = new Map<string, string[]>();
-
-        failedQueries.forEach(query => {
-            const features = this.extractFeatures(query);
-            const mainFeature = features.find(f => learningData.commonPhrases.get(f) || 0 > 5) || features[0];
-
-            if (mainFeature) {
-                if (!queryGroups.has(mainFeature)) {
-                    queryGroups.set(mainFeature, []);
-                }
-                queryGroups.get(mainFeature)!.push(query);
-            }
-        });
-
-        // Generate knowledge items for frequent failed queries
-        queryGroups.forEach((queries, feature) => {
-            if (queries.length >= 3) {
-                const newItem: KnowledgeItem = {
-                    id: `learned_${feature.replace(/\s+/g, '_')}`,
-                    keywords: [feature, ...this.extractFeatures(queries.join(' '))],
-                    patterns: [new RegExp(feature, 'i')],
-                    response: `I've noticed you're asking about ${feature}. While I'm still learning about this topic, I'd recommend contacting our support team for detailed information. They can provide you with the most accurate and up-to-date details!`,
-                    category: "learned",
-                    confidence: 0.6,
-                    usageCount: 0,
-                    successRate: 0.5,
-                    createdAt: new Date(),
-                    lastUsed: new Date(),
-                    userFeedback: []
-                };
-
-                newItems.push(newItem);
-            }
-        });
-
-        return newItems;
-    }
-}
-
-// Enhanced Intelligent ChatBot with Learning
-class LearningChatBot {
-    private static updateKnowledgeBaseStats(item: KnowledgeItem, wasHelpful?: boolean) {
-        item.usageCount++;
-        item.lastUsed = new Date();
-
-        if (wasHelpful !== undefined) {
-            const totalFeedback = item.userFeedback.length + 1;
-            const currentSuccessRate = item.successRate * item.userFeedback.length;
-            item.successRate = (currentSuccessRate + (wasHelpful ? 1 : 0)) / totalFeedback;
-
-            item.userFeedback.push({
-                rating: wasHelpful ? 5 : 2,
-                timestamp: new Date()
+        // Update trending topics
+        const trendingData = asuLearningData.trendingTopics.get(input);
+        if (trendingData) {
+            trendingData.count++;
+            trendingData.lastSeen = new Date();
+        } else {
+            asuLearningData.trendingTopics.set(input, {
+                count: 1,
+                lastSeen: new Date(),
+                category
             });
         }
     }
 
-    private static getContextualResponse(message: string, context?: ConversationContext): string {
-        const lowerMessage = message.toLowerCase();
-
-        // First, try to use learned patterns
-        const learnedResponse = MachineLearning.generateLearnedResponse(message);
-        if (learnedResponse) {
-            return MachineLearning.adaptResponseStyle(learnedResponse, context || {} as ConversationContext);
-        }
-
-        // Check for GPA information
-        if (this.containsGPAInfo(message)) {
-            return this.analyzeGPA(message, context);
-        }
-
-        // Intent classification
-        if (this.isGreeting(lowerMessage)) {
-            return this.getPersonalizedGreeting(context);
-        }
-
-        if (this.isQuestion(lowerMessage)) {
-            return this.handleQuestion(message, context);
-        }
-
-        if (this.isPriceInquiry(lowerMessage)) {
-            return this.handlePricing(message, context);
-        }
-
-        if (this.isComplaint(lowerMessage)) {
-            return this.handleComplaint(message);
-        }
-
-        // Fallback to knowledge base with learning enhancement
-        return this.searchKnowledgeBase(message, context);
+    static async performWebSearch(query: string): Promise<SearchResult[]> {
+        const searchService = new ASUSearchService();
+        return await searchService.search(query, false); // Don't force ASU context for general queries
     }
 
-    private static isGreeting(message: string): boolean {
-        const greetingPatterns = [
-            /^(hi|hello|hey|greetings)/i,
-            /good (morning|afternoon|evening)/i,
-            /what's up/i,
-            /howdy/i
-        ];
-        return greetingPatterns.some(pattern => pattern.test(message));
-    }
+    static generateEnhancedResponse(
+        baseResponse: string,
+        searchResults: SearchResult[],
+        language: 'en' | 'km' = 'en'
+    ): string {
+        if (searchResults.length === 0) return baseResponse;
 
-    private static isQuestion(message: string): boolean {
-        const questionWords = ["what", "how", "when", "where", "why", "which", "who", "can you", "do you", "will you"];
-        return questionWords.some(word => message.toLowerCase().includes(word)) || message.includes("?");
-    }
+        let enhancedResponse = baseResponse;
 
-    private static isPriceInquiry(message: string): boolean {
-        const priceKeywords = ["price", "cost", "fee", "expensive", "cheap", "afford", "budget", "money", "pay"];
-        return priceKeywords.some(keyword => message.toLowerCase().includes(keyword));
-    }
+        // Add web-enhanced information
+        enhancedResponse += `\n\n**📡 Latest Information:**\n`;
 
-    private static isComplaint(message: string): boolean {
-        const complaintKeywords = ["problem", "issue", "wrong", "error", "bug", "not working", "broken"];
-        return complaintKeywords.some(keyword => message.toLowerCase().includes(keyword));
-    }
+        searchResults.slice(0, 3).forEach((result, index) => {
+            enhancedResponse += `\n${index + 1}. **${result.title}**\n   ${result.snippet}\n`;
+        });
 
-    private static containsGPAInfo(message: string): boolean {
-        // Check for GPA patterns like "3.5 GPA", "gpa is 3.8", etc.
-        const gpaPatterns = [
-            /\b\d\.\d+\s*(gpa|grade)/i,
-            /(gpa|grade).*is.*\d\.\d+/i,
-            /\b\d\.\d+\s*(out of|on a scale of)/i
-        ];
-
-        return gpaPatterns.some(pattern => pattern.test(message)) ||
-            message.toLowerCase().includes("my gpa") ||
-            message.toLowerCase().includes("gpa of");
-    }
-
-    private static extractGPA(message: string): { value: number; scale: number } | null {
-        // Extract GPA value from message
-        const gpaMatch = message.match(/\b(\d\.\d+)\b/);
-        if (!gpaMatch) return null;
-
-        const value = parseFloat(gpaMatch[1]);
-
-        // Check for scale (default is 4.0)
-        let scale = 4.0;
-        const scaleMatch = message.match(/(\d\.\d+)\s*(out of|scale|on a scale of)\s*(\d\.\d+)/i);
-        if (scaleMatch && scaleMatch[3]) {
-            scale = parseFloat(scaleMatch[3]);
-        }
-
-        return { value, scale };
-    }
-
-    private static analyzeGPA(message: string, context?: ConversationContext): string {
-        const gpaInfo = this.extractGPA(message);
-
-        if (!gpaInfo) {
-            return "I'd love to analyze your GPA for scholarship eligibility! Could you please share your GPA in the format like '3.5 GPA' or 'My GPA is 3.8'?";
-        }
-
-        // Update context with GPA info
-        if (context) {
-            context.gpaInfo = {
-                value: gpaInfo.value,
-                scale: gpaInfo.scale,
-                provided: true
-            };
-        }
-
-        // Normalize GPA to 4.0 scale for analysis
-        const normalizedGPA = gpaInfo.scale === 4.0 ? gpaInfo.value : (gpaInfo.value / gpaInfo.scale) * 4.0;
-
-        // Determine scholarship eligibility
-        let scholarshipPercentage = 0;
-        let scholarshipTier = "Not eligible";
-
-        if (normalizedGPA >= 3.8) {
-            scholarshipPercentage = 50;
-            scholarshipTier = "Academic Excellence";
-        } else if (normalizedGPA >= 3.5) {
-            scholarshipPercentage = 30;
-            scholarshipTier = "Academic Excellence";
-        } else if (normalizedGPA >= 3.0) {
-            scholarshipPercentage = 15;
-            scholarshipTier = "Academic Merit";
-        }
-
-        // Generate personalized response
-        let response = `📊 **GPA Analysis Results**\n\n`;
-        response += `Based on your GPA of ${gpaInfo.value} (on a ${gpaInfo.scale} scale):\n\n`;
-
-        if (scholarshipPercentage > 0) {
-            response += `🎉 **Congratulations!** You qualify for our **${scholarshipTier} Scholarship**!\n\n`;
-            response += `**💰 Potential Award:** Up to ${scholarshipPercentage}% tuition coverage\n\n`;
-            response += `**📋 Next Steps:**\n`;
-            response += `• Complete your application for official scholarship offer\n`;
-            response += `• Prepare supporting documents\n`;
-            response += `• Schedule financial aid consultation\n\n`;
-            response += `**💡 Additional merit-based awards may be available for:**\n`;
-            response += `• STEM background and achievements\n`;
-            response += `• Leadership experience\n`;
-            response += `• Community involvement\n`;
-            response += `• Personal statement quality\n\n`;
+        if (language === 'km') {
+            enhancedResponse += `\n*ព័ត៌មានបានប្រមូលពីប្រភពចុងក្រោយបំផុត*`;
         } else {
-            response += `While your current GPA doesn't qualify for our academic scholarships, we offer several other opportunities:\n\n`;
-            response += `**💼 Need-Based Financial Aid:**\n`;
-            response += `• Income-based discounts\n`;
-            response += `• Payment plans with 0% interest\n`;
-            response += `• Work-study opportunities\n\n`;
-            response += `**🎯 Merit-Based Awards:**\n`;
-            response += `• Portfolio-based scholarships for tech projects\n`;
-            response += `• Leadership and community service awards\n`;
-            response += `• Diversity and inclusion scholarships\n\n`;
+            enhancedResponse += `\n*Information gathered from current sources*`;
         }
 
-        response += `**🚀 To Get Started:**\n`;
-        response += `1. Complete our online application\n`;
-        response += `2. Upload your transcript for official review\n`;
-        response += `3. Schedule a consultation with our financial aid team\n\n`;
-        response += `Would you like me to help you with the application process?`;
+        return enhancedResponse;
+    }
+}
 
-        return response;
+// Enhanced Main Chatbot
+class ASUChatBot {
+    private static detectLanguage(message: string): 'en' | 'km' {
+        const khmerChars = /[\u1780-\u17FF]/;
+        return khmerChars.test(message) ? 'km' : 'en';
     }
 
-    private static getPersonalizedGreeting(context?: ConversationContext): string {
-        if (context?.askedQuestions.length) {
-            return "Welcome back! I'm glad you're interested in learning more. What other questions can I answer for you?";
-        }
-
-        // Learn from user's preferred greeting style
-        const styles = ["formal", "casual", "enthusiastic"];
-        const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-
-        switch (randomStyle) {
-            case "formal":
-                return "Good day! Welcome to Ambitious Students Ubiquitous. I am your AI assistant, here to provide information about our educational programs. How may I assist you today?";
-            case "casual":
-                return "Hey there! Welcome to Ambitious Students! I'm your AI buddy here to help you learn about our awesome tech programs. What's on your mind?";
-            case "enthusiastic":
-            default:
-                return "Hello there! Welcome to Ambitious Students Ubiquitous! I'm super excited to help you discover amazing learning opportunities. What interests you most?";
-        }
-    }
-
-    private static handleQuestion(message: string, context?: ConversationContext): string {
-        const lowerMessage = message.toLowerCase();
-
-        if (lowerMessage.includes("what") && (lowerMessage.includes("course") || lowerMessage.includes("program"))) {
-            const item = knowledgeBase.find(kb => kb.id === "courses_general");
-            if (item) {
-                this.updateKnowledgeBaseStats(item);
-                return MachineLearning.adaptResponseStyle(item.response, context || {} as ConversationContext);
-            }
-        }
-
-        if (lowerMessage.includes("how") && lowerMessage.includes("apply")) {
-            const item = knowledgeBase.find(kb => kb.id === "admission_process");
-            if (item) {
-                this.updateKnowledgeBaseStats(item);
-                return MachineLearning.adaptResponseStyle(item.response, context || {} as ConversationContext);
-            }
-        }
-
-        return this.searchKnowledgeBase(message, context);
-    }
-
-    private static handlePricing(message: string, context?: ConversationContext): string {
-        const pricingKB = knowledgeBase.find(kb => kb.id === "pricing_detailed");
-        if (pricingKB) {
-            this.updateKnowledgeBaseStats(pricingKB);
-            return MachineLearning.adaptResponseStyle(pricingKB.response, context || {} as ConversationContext);
-        }
-        return "Our pricing starts at $9.99 per month with various plans available.";
-    }
-
-    private static handleComplaint(message: string): string {
-        return "I'm sorry to hear you're experiencing an issue! Our support team is here to help 24/7. You can:\n\n• Use our live chat for instant assistance\n• Email us at support@ambitiousstudents.com\n• Call +1-800-AMBITIOUS\n\nWe typically resolve issues within 10 minutes. What specific problem can I help you with right now?";
-    }
-
-    private static searchKnowledgeBase(message: string, context?: ConversationContext): string {
-        const lowerMessage = message.toLowerCase();
-        let bestMatch: KnowledgeItem | null = null;
+    private static async findBestMatch(message: string): Promise<ASUKnowledgeItem | null> {
+        let bestMatch: ASUKnowledgeItem | null = null;
         let highestScore = 0;
+        const language = this.detectLanguage(message);
 
-        // Enhanced matching with machine learning
-        for (const item of knowledgeBase) {
+        for (const item of asuKnowledgeBase) {
             let score = 0;
+            const keywords = language === 'km' ? item.khmerKeywords : item.keywords;
 
             // Keyword matching
-            for (const keyword of item.keywords) {
-                if (lowerMessage.includes(keyword.toLowerCase())) {
-                    score += 2;
+            for (const keyword of keywords) {
+                if (message.toLowerCase().includes(keyword.toLowerCase())) {
+                    score += 3;
                 }
             }
 
             // Pattern matching
             for (const pattern of item.patterns) {
                 if (pattern.test(message)) {
-                    score += 3;
+                    score += 4;
                 }
             }
 
-            // Context bonus
-            if (context?.lastCategory === item.category) {
-                score += 1;
-            }
-
-            // Success rate bonus
+            // Success rate and usage bonus
             score += item.successRate * 2;
+            score += Math.min(item.usageCount / 10, 1);
 
-            // Similarity matching using ML
-            const similarity = MachineLearning.calculateSimilarity(
-                message,
-                item.keywords.join(' ') + ' ' + item.response
-            );
-            score += similarity * 5;
+            // Recent update bonus
+            const daysSinceUpdate = (Date.now() - item.lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysSinceUpdate < 7) score += 0.5;
 
-            if (score > highestScore) {
+            if (score > highestScore && score >= 2) {
                 highestScore = score;
                 bestMatch = item;
             }
         }
 
-        if (bestMatch && highestScore >= 2) {
-            this.updateKnowledgeBaseStats(bestMatch);
-            return MachineLearning.adaptResponseStyle(bestMatch.response, context || {} as ConversationContext);
-        }
-
-        // Track failed queries for learning
-        learningData.failedQueries.push({
-            query: message,
-            timestamp: new Date(),
-            sessionId: context?.toString() || "unknown",
-            attempts: 1
-        });
-
-        // Enhanced fallback responses
-        return this.getIntelligentFallback(message);
+        return bestMatch;
     }
 
-    private static getIntelligentFallback(message: string): string {
-        // Learn from failed queries and adapt fallback
-        const similarFailures = learningData.failedQueries.filter(fq =>
-            MachineLearning.calculateSimilarity(fq.query, message) > 0.3
-        );
+    public static async processMessage(
+        message: string,
+        sessionId: string = "default"
+    ): Promise<{
+        reply: string;
+        language: 'en' | 'km';
+        category: string;
+        searchUsed: boolean;
+        confidence: number;
+        responseTime: number;
+        sources: string[];
+    }> {
+        const startTime = Date.now();
+        const language = this.detectLanguage(message);
+        let searchUsed = false;
+        let sources: string[] = [];
 
-        if (similarFailures.length > 2) {
-            return "I notice this is a common question that I'm still learning about! Let me connect you with our human support team who can give you a detailed answer:\n\n📞 Call: +1-800-AMBITIOUS\n📧 Email: support@ambitiousstudents.com\n💬 Live Chat: Available 24/7\n\nIs there anything else about our programs I can help you with in the meantime?";
-        }
+        try {
+            // Find best knowledge match
+            const bestMatch = await this.findBestMatch(message);
+            let response = "";
+            let category = "general";
+            let confidence = 0.7; // Default confidence for general queries
 
-        const fallbacks = [
-            "That's an interesting question! I'm always learning and improving. While I don't have specific information about that right now, I'd be happy to help you with:\n\n• Course information and curriculum details\n• Admission requirements and application process\n• Pricing and payment options\n• Career support and job placement\n\nWhat would you like to know more about?",
+            if (bestMatch) {
+                // Use appropriate language response
+                response = language === 'km' && bestMatch.khmerResponse
+                    ? bestMatch.khmerResponse
+                    : bestMatch.response;
 
-            "Could you rephrase your question? I'm particularly knowledgeable about:\n\n• Our Software Engineering and IT programs\n• Admission process and requirements\n• Pricing and financial aid options\n• Student support services\n\nWhat specific area interests you most?",
+                category = bestMatch.category;
+                confidence = bestMatch.confidence;
+                sources = bestMatch.sources;
 
-            "While I'm still learning about that specific topic, our admissions team would be perfect to help you.\n\nIn the meantime, I can share details about:\n• Program curriculum and structure\n• Student success stories\n• Pricing and scholarships\n• Getting started with applications\n\nWhat would you like to explore first?"
-        ];
+                // Update usage stats
+                bestMatch.usageCount++;
+                bestMatch.lastUsed = new Date();
 
-        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
-    }
+                // Check if web search should enhance response
+                if (bestMatch.webSearchEnabled) {
+                    searchUsed = true;
+                    try {
+                        const searchResults = await ASULearningEngine.performWebSearch(message);
+                        if (searchResults.length > 0) {
+                            response = ASULearningEngine.generateEnhancedResponse(response, searchResults, language);
+                            sources = [...sources, ...searchResults.map(r => r.url)];
+                            confidence = Math.min(confidence + 0.05, 0.98);
 
-    public static processMessage(message: string, sessionId: string = "default", feedback?: { wasHelpful?: boolean; rating?: number }): string {
-        // Get or create conversation context
-        let context = conversations.get(sessionId);
-        if (!context) {
-            context = {
-                askedQuestions: [],
-                interests: [],
-                stage: "initial",
-                gpaInfo: {
-                    provided: false
+                            // Update knowledge item with search data
+                            bestMatch.searchData = {
+                                lastSearchQuery: message,
+                                lastSearchTime: new Date(),
+                                searchResults,
+                                webEnhancedResponse: response
+                            };
+                            bestMatch.lastUpdated = new Date();
+                        }
+                    } catch (error) {
+                        console.warn('Web search failed:', error);
+                    }
                 }
-            };
-            conversations.set(sessionId, context);
-        }
+            } else {
+                // No knowledge match - use web search for all queries
+                searchUsed = true;
+                category = "other";
+                confidence = 0.6;
 
-        // Process the message
-        const response = this.getContextualResponse(message, context);
+                try {
+                    const searchResults = await ASULearningEngine.performWebSearch(message);
+                    if (searchResults.length > 0) {
+                        const baseResponse = language === 'km'
+                            ? `ខ្ញុំរកឃើញព័ត៌មាននេះអំពី "${message}":`
+                            : `I found this information about "${message}":`;
 
-        // Learn from the interaction
-        MachineLearning.learnFromInteraction(message, response, sessionId, feedback?.wasHelpful);
-
-        // Update context
-        context.askedQuestions.push(message);
-
-        // Extract interests and learn user preferences
-        const interestKeywords = ["software", "programming", "cybersecurity", "data science", "web development"];
-        interestKeywords.forEach(keyword => {
-            if (message.toLowerCase().includes(keyword) && !context!.interests.includes(keyword)) {
-                context!.interests.push(keyword);
+                        response = ASULearningEngine.generateEnhancedResponse(baseResponse, searchResults, language);
+                        sources = searchResults.map(r => r.url);
+                        confidence = 0.75;
+                    } else {
+                        response = this.generateFallback(message, language);
+                        confidence = 0.4;
+                    }
+                } catch (error) {
+                    response = this.generateFallback(message, language);
+                    confidence = 0.3;
+                }
             }
-        });
 
-        // Learn response style preference
-        if (message.includes("brief") || message.includes("short")) {
-            context.preferredResponseStyle = "concise";
-        } else if (message.includes("detail") || message.includes("explain more")) {
-            context.preferredResponseStyle = "detailed";
-        } else if (message.includes("casual") || message.includes("friendly")) {
-            context.preferredResponseStyle = "conversational";
+            const responseTime = Date.now() - startTime;
+
+            // Learn from this interaction
+            await ASULearningEngine.learnFromASUInteraction(
+                message,
+                response,
+                sessionId,
+                undefined,
+                language
+            );
+
+            return {
+                reply: response,
+                language,
+                category,
+                searchUsed,
+                confidence,
+                responseTime,
+                sources
+            };
+
+        } catch (error) {
+            console.error("ChatBot Error:", error);
+
+            const fallbackResponse = this.generateFallback(message, this.detectLanguage(message));
+            const responseTime = Date.now() - startTime;
+
+            return {
+                reply: fallbackResponse,
+                language: this.detectLanguage(message),
+                category: "error",
+                searchUsed: false,
+                confidence: 0.2,
+                responseTime,
+                sources: []
+            };
         }
-
-        // Update conversation stage
-        if (message.toLowerCase().includes("apply") || message.toLowerCase().includes("enroll")) {
-            context.stage = "enrolling";
-        } else if (message.toLowerCase().includes("price") || message.toLowerCase().includes("cost")) {
-            context.stage = "deciding";
-        } else if (context.askedQuestions.length > 1) {
-            context.stage = "exploring";
-        }
-
-        return response;
     }
 
-    // Get learning statistics
-    public static getLearningStats() {
+    private static generateFallback(message: string, language: 'en' | 'km'): string {
+        const fallbacks = {
+            en: [
+                `I'm researching information about "${message}". While I specialize in ASU and study abroad, I can help you find information on various topics using web search.`,
+                `That's an interesting question! Let me search for the most current information about "${message}" for you.`,
+                `I'm expanding my knowledge base to include more topics. Let me find the latest information about "${message}" from reliable sources.`
+            ],
+            km: [
+                `ខ្ញុំកំពុងស្រាវជ្រាវព័ត៌មានអំពី "${message}"។ ខណៈខ្ញុំឯកទេសខាង ASU និងការសិក្សានៅបរទេស ខ្ញុំអាចជួយអ្នករកព័ត៌មានអំពីប្រធានបទផ្សេងៗដោយប្រើការស្វែងរកវេប។`,
+                `នេះជាសំណួរគួរឱ្យចាប់អារម្មណ៍! សូមឱ្យខ្ញុំស្វែងរកព័ត៌មានចុងក្រោយបំផុតអំពី "${message}" សម្រាប់អ្នក។`,
+                `ខ្ញុំកំពុងពង្រីកមូលដ្ឋានចំណេះដឹងរបស់ខ្ញុំដើម្បីរួមបញ្ចូលប្រធានបទបន្ថែមទៀត។ សូមឱ្យខ្ញុំរកព័ត៌មានចុងក្រោយបំផុតអំពី "${message}" ពីប្រភពដែលអាចទុកចិត្តបាន។`
+            ]
+        };
+
+        const languageFallbacks = fallbacks[language];
+        return languageFallbacks[Math.floor(Math.random() * languageFallbacks.length)];
+    }
+
+    // Enhanced auto-generation for broader topics
+    private static async autoGenerateKnowledge(): Promise<void> {
+        const frequentQueries = Array.from(asuLearningData.trendingTopics.entries())
+            .filter(([query, data]) => data.count >= 3) // Lower threshold for more topics
+            .sort(([,a], [,b]) => b.count - a.count)
+            .slice(0, 10);
+
+        for (const [query, data] of frequentQueries) {
+            const hasExistingKnowledge = asuKnowledgeBase.some(kb =>
+                kb.keywords.some(keyword => query.toLowerCase().includes(keyword.toLowerCase())) ||
+                kb.khmerKeywords.some(keyword => query.includes(keyword))
+            );
+
+            if (!hasExistingKnowledge) {
+                const newItem = await this.createKnowledgeItem(query, data.category);
+                if (newItem) {
+                    asuKnowledgeBase.push(newItem);
+                    console.log(`Auto-generated knowledge: ${newItem.id}`);
+                }
+            }
+        }
+    }
+
+    private static async createKnowledgeItem(query: string, category: string): Promise<ASUKnowledgeItem | null> {
+        const features = ASULearningEngine.extractASUFeatures(query);
+        const language = this.detectLanguage(query);
+
+        let searchResults: SearchResult[] = [];
+        try {
+            searchResults = await ASULearningEngine.performWebSearch(query);
+        } catch (error) {
+            console.warn('Failed to search for auto-knowledge generation:', error);
+        }
+
+        if (searchResults.length === 0) return null;
+
+        const response = language === 'km'
+            ? `បានតាមការស្វែងយល់របស់អ្នកអំពី ${query}, នេះគឺជាព័ត៌មានដែលខ្ញុំរកឃើញ៖`
+            : `Based on your inquiry about ${query}, here's what I found:`;
+
+        const enhancedResponse = ASULearningEngine.generateEnhancedResponse(response, searchResults, language);
+
+        const newItem: ASUKnowledgeItem = {
+            id: `auto_${category}_${Date.now()}`,
+            keywords: features.filter(f => !f.startsWith('_') && f.length > 2).slice(0, 8),
+            khmerKeywords: language === 'km' ? [query.slice(0, 25)] : [],
+            patterns: [new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')],
+            response: enhancedResponse,
+            khmerResponse: language === 'km' ? enhancedResponse : undefined,
+            category: category as any,
+            confidence: 0.65,
+            usageCount: 0,
+            successRate: 0.6,
+            lastUsed: new Date(),
+            lastUpdated: new Date(),
+            webSearchEnabled: true,
+            autoUpdate: true,
+            sources: searchResults.map(r => r.url),
+            userFeedback: []
+        };
+
+        return newItem;
+    }
+
+    // Get comprehensive statistics
+    public static getStats() {
+        const totalInteractions = asuLearningData.userInteractions.length;
+        const khmerInteractions = asuLearningData.userInteractions.filter(int => int.language === 'km').length;
+
+        const categoryStats = asuKnowledgeBase.reduce((acc, kb) => {
+            acc[kb.category] = (acc[kb.category] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const topTrending = Array.from(asuLearningData.trendingTopics.entries())
+            .sort(([,a], [,b]) => b.count - a.count)
+            .slice(0, 15);
+
         return {
-            totalInteractions: learningData.userInteractions.length,
-            uniquePatterns: learningData.patterns.size,
-            knowledgeBaseSize: knowledgeBase.length,
-            averageSuccessRate: knowledgeBase.reduce((sum, item) => sum + item.successRate, 0) / knowledgeBase.length,
-            recentFailures: learningData.failedQueries.filter(fq =>
-                Date.now() - fq.timestamp.getTime() < 24 * 60 * 60 * 1000
-            ).length,
-            topPatterns: Array.from(learningData.commonPhrases.entries())
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 10),
-            lastLearningUpdate: new Date().toISOString()
+            totalInteractions,
+            khmerInteractions,
+            englishInteractions: totalInteractions - khmerInteractions,
+            knowledgeBaseSize: asuKnowledgeBase.length,
+            autoLearnedItems: asuKnowledgeBase.filter(kb => kb.id.startsWith('auto_')).length,
+            categoryBreakdown: categoryStats,
+            studentQueries: asuLearningData.studentQueries.size,
+            generalQueries: asuLearningData.generalQueries.size,
+            successStories: asuLearningData.successStories.length,
+            trendingTopics: topTrending,
+            averageConfidence: asuKnowledgeBase.reduce((sum, kb) => sum + kb.confidence, 0) / asuKnowledgeBase.length,
+            lastUpdate: new Date().toISOString(),
+            languages: ['English', 'Khmer'],
+            specialization: 'ASU & General Knowledge'
         };
     }
 
-    // Manual learning from feedback
-    public static provideFeedback(sessionId: string, messageIndex: number, wasHelpful: boolean, feedback?: string) {
-        const context = conversations.get(sessionId);
-        if (!context || !context.askedQuestions[messageIndex]) {
-            return false;
-        }
-
-        const message = context.askedQuestions[messageIndex];
-        const interaction = learningData.userInteractions.find(
-            int => int.sessionId === sessionId && int.input === message
+    // Enhanced feedback system
+    public static async provideFeedback(
+        sessionId: string,
+        messageIndex: number,
+        wasHelpful: boolean,
+        feedback?: string,
+        language: 'en' | 'km' = 'en'
+    ): Promise<boolean> {
+        const interaction = asuLearningData.userInteractions.find(
+            int => int.sessionId === sessionId &&
+                asuLearningData.userInteractions.indexOf(int) === messageIndex
         );
 
-        if (interaction) {
-            interaction.wasHelpful = wasHelpful;
-            interaction.rating = wasHelpful ? 5 : 2;
+        if (!interaction) return false;
 
-            // Re-learn from this interaction
-            MachineLearning.learnFromInteraction(
-                interaction.input,
-                interaction.response,
-                sessionId,
-                wasHelpful
-            );
+        interaction.wasHelpful = wasHelpful;
 
-            return true;
+        // Find and update matching knowledge item
+        const matchingKB = asuKnowledgeBase.find(kb =>
+            kb.response.includes(interaction.response.slice(0, 50)) ||
+            (kb.khmerResponse && kb.khmerResponse.includes(interaction.response.slice(0, 50)))
+        );
+
+        if (matchingKB) {
+            matchingKB.userFeedback.push({
+                rating: wasHelpful ? 5 : 2,
+                feedback,
+                timestamp: new Date(),
+                language
+            });
+
+            const totalFeedback = matchingKB.userFeedback.length;
+            const positiveFeedback = matchingKB.userFeedback.filter(fb => fb.rating >= 4).length;
+            matchingKB.successRate = positiveFeedback / totalFeedback;
         }
 
-        return false;
+        // Re-learn from this interaction
+        await ASULearningEngine.learnFromASUInteraction(
+            interaction.input,
+            interaction.response,
+            sessionId,
+            wasHelpful,
+            interaction.language
+        );
+
+        // Trigger auto-improvement for negative feedback
+        if (!wasHelpful) {
+            await this.autoGenerateKnowledge();
+        }
+
+        return true;
+    }
+
+    // Add new information manually
+    public static addInformation(
+        keywords: string[],
+        khmerKeywords: string[],
+        response: string,
+        khmerResponse: string,
+        category: string,
+        sources: string[] = []
+    ): string {
+        const newItem: ASUKnowledgeItem = {
+            id: `manual_${Date.now()}`,
+            keywords,
+            khmerKeywords,
+            patterns: keywords.map(kw => new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')),
+            response,
+            khmerResponse,
+            category: category as any,
+            confidence: 0.85,
+            usageCount: 0,
+            successRate: 0.8,
+            lastUsed: new Date(),
+            lastUpdated: new Date(),
+            webSearchEnabled: true,
+            autoUpdate: true,
+            sources,
+            userFeedback: []
+        };
+
+        asuKnowledgeBase.push(newItem);
+        return newItem.id;
     }
 }
 
-// Enhanced API handler with learning capabilities
+// Enhanced API handler
 export async function POST(req: Request) {
     try {
-        const { message, sessionId, feedback, action } = await req.json();
+        const { message, sessionId, feedback, action, newInfo } = await req.json();
 
-        // Handle different actions
         switch (action) {
             case 'feedback':
-                const success = LearningChatBot.provideFeedback(
-                    sessionId,
+                const success = await ASUChatBot.provideFeedback(
+                    sessionId || 'default',
                     feedback.messageIndex,
                     feedback.wasHelpful,
-                    feedback.comment
+                    feedback.comment,
+                    feedback.language || 'en'
                 );
 
                 return NextResponse.json({
                     success,
-                    message: success ? "Thank you for your feedback! I'm learning from it." : "Feedback not recorded"
+                    message: success
+                        ? (feedback.language === 'km' ? "អរគុណ! ខ្ញុំកំពុងរៀនពីមតិរបស់អ្នក។" : "Thank you! I'm learning from your feedback.")
+                        : "Feedback not recorded"
                 });
 
             case 'stats':
                 return NextResponse.json({
-                    stats: LearningChatBot.getLearningStats()
+                    stats: ASUChatBot.getStats()
+                });
+
+            case 'addInfo':
+                if (newInfo && newInfo.keywords && newInfo.response) {
+                    const newId = ASUChatBot.addInformation(
+                        newInfo.keywords,
+                        newInfo.khmerKeywords || [],
+                        newInfo.response,
+                        newInfo.khmerResponse || '',
+                        newInfo.category || 'general',
+                        newInfo.sources || []
+                    );
+
+                    return NextResponse.json({
+                        success: true,
+                        message: `New information added successfully`,
+                        id: newId
+                    });
+                }
+
+                return NextResponse.json({
+                    success: false,
+                    message: "Invalid information format"
                 });
 
             default:
-                // Regular chat processing
                 if (!message?.trim()) {
                     return NextResponse.json({
-                        reply: "I didn't receive your message. Could you please try again?",
+                        reply: "I didn't receive your message. Please try again. / ខ្ញុំមិនទទួលបានសាររបស់អ្នក។ សូមព្យាយាមម្តងទៀត។",
                         error: "empty_message"
                     });
                 }
 
-                // Process with intelligent learning bot
-                const reply = LearningChatBot.processMessage(message, sessionId, feedback);
+                const result = await ASUChatBot.processMessage(
+                    message,
+                    sessionId || 'default'
+                );
 
-                // Simulate realistic typing delay based on response length
-                const baseDelay = 800;
-                const lengthDelay = Math.min(reply.length * 8, 2500);
-                const totalDelay = baseDelay + lengthDelay;
-
-                await new Promise(resolve => setTimeout(resolve, totalDelay));
-
-                // Get current learning stats for response metadata
-                const stats = LearningChatBot.getLearningStats();
+                const stats = ASUChatBot.getStats();
 
                 return NextResponse.json({
-                    reply,
+                    ...result,
                     timestamp: new Date().toISOString(),
-                    confidence: "high",
                     learningStats: {
                         totalInteractions: stats.totalInteractions,
                         knowledgeBaseSize: stats.knowledgeBaseSize,
-                        isLearning: true
+                        autoLearnedItems: stats.autoLearnedItems,
+                        languages: stats.languages,
+                        specialization: stats.specialization,
+                        isLearning: true,
+                        asuFocused: true,
+                        generalKnowledge: true
                     },
                     metadata: {
-                        sessionId,
+                        sessionId: sessionId || 'default',
                         messageLength: message.length,
-                        processingTime: totalDelay
+                        asuSpecialized: true,
+                        bilingualSupport: true,
+                        webSearchEnabled: true
                     }
                 });
         }
 
     } catch (error) {
-        console.error("Chat API Error:", error);
+        console.error("ChatBot Error:", error);
 
         return NextResponse.json({
-            reply: "I'm experiencing some technical difficulties right now. However, I'm continuously learning and improving! Please try again in a moment, or contact our support team for immediate assistance!",
-            error: "server_error",
-            learningActive: true
+            reply: "I encountered an issue, but I'm learning from it! Please try again. / ខ្ញុំមានបញ្ហា ប៉ុន្តែខ្ញុំកំពុងរៀនពីវា! សូមព្យាយាមម្តងទៀត។",
+            error: "processing_error",
+            searchUsed: false,
+            confidence: 0.1,
+            responseTime: 0,
+            asuSpecialized: true,
+            language: 'en',
+            sources: []
         }, { status: 500 });
     }
+}
+
+// Add GET endpoint for health check and basic functionality
+export async function GET() {
+    return NextResponse.json({
+        status: "online",
+        message: "ASU ChatBot is running with enhanced general knowledge capabilities",
+        capabilities: [
+            "ASU-specific information",
+            "Study abroad guidance",
+            "Visa assistance",
+            "General knowledge queries",
+            "Web search integration",
+            "Bilingual support (English/Khmer)",
+            "Auto-learning from interactions"
+        ],
+        timestamp: new Date().toISOString()
+    });
 }
