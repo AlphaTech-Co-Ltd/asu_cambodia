@@ -44,13 +44,31 @@ class ASUSearchService implements WebSearchService {
 
             const data = await response.json();
 
-            return (data.items || []).map((item: any, index: number) => ({
-                title: item.title,
-                snippet: item.snippet,
-                url: item.link,
-                relevance: 1 - (index * 0.1),
-                category: this.categorizeResult(item.title + ' ' + item.snippet)
-            }));
+            return (data.items || []).map((item: unknown, index: number) => {
+                if (
+                    typeof item === "object" &&
+                    item !== null &&
+                    "title" in item &&
+                    "snippet" in item &&
+                    "link" in item
+                ) {
+                    const { title, snippet, link } = item as {
+                        title: string;
+                        snippet: string;
+                        link: string;
+                    };
+
+                    return {
+                        title,
+                        snippet,
+                        url: link,
+                        relevance: 1 - index * 0.1,
+                        category: this.categorizeResult(title + " " + snippet),
+                    };
+                }
+                return null;
+            });
+
         } catch (error) {
             console.error('Search error:', error);
             return this.fallbackSearch(enhancedQuery);
@@ -634,7 +652,7 @@ class ASUChatBot {
             patterns: [new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')],
             response: enhancedResponse,
             khmerResponse: language === 'km' ? enhancedResponse : undefined,
-            category: category as any,
+            category: category as never,
             confidence: 0.65,
             usageCount: 0,
             successRate: 0.6,
@@ -750,7 +768,7 @@ class ASUChatBot {
             patterns: keywords.map(kw => new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')),
             response,
             khmerResponse,
-            category: category as any,
+            category: category as never,
             confidence: 0.85,
             usageCount: 0,
             successRate: 0.8,
