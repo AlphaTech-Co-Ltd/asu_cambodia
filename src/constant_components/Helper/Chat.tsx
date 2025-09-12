@@ -126,7 +126,7 @@ export default function DarkModeChatWidget() {
                                 </div>
                                 <h4 className="font-bold text-gray-100 text-xl mb-3">Hey there! 👋</h4>
                                 <div className="text-sm text-gray-400 leading-relaxed max-w-xs">
-                                    I'm your AI assistant. Ask me anything and I'll help you out instantly!
+                                    I&#39;m your AI assistant. Ask me anything and I&#39;ll help you out instantly!
                                 </div>
                             </div>
                         )}
