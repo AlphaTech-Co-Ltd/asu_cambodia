@@ -24,7 +24,7 @@ export default function Why_Choose_Us() {
         {
             icon: <FaUniversity className="w-8 h-8 text-yellow-600" />,
             title: "Study Cost Assurance",
-            desc: "Ensure tuition fees and living expenses are clear and manageable for students.",
+            desc: "Ensure conditions fees and living expenses are clear and manageable for students.",
         },
         {
             icon: <FaHandHoldingUsd className="w-8 h-8 text-yellow-600" />,

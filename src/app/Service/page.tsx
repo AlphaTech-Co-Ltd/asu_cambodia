@@ -95,7 +95,7 @@ export default function VisaEducationServices() {
         { icon: <Users className="w-6 h-6" />, label: "Students Placed", value: "100+", text:"Students" },
         { icon: <Award className="w-6 h-6" />, label: "Success Rate", value: "90%", text:"Rate" },
         { icon: <Globe className="w-6 h-6" />, label: "Partner Universities", value: "RUPP | BETEI", text: "Partner Universities" },
-        { icon: <Shield className="w-6 h-6" />, label: "Years Experience", value: "3+" }
+        { icon: <Shield className="w-6 h-6" />, label: "Years Experience", value: "3+ years" },
     ];
 
     useEffect(() => {

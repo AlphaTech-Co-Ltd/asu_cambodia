@@ -6,23 +6,29 @@ interface SearchResult {
     snippet: string;
     url: string;
     relevance: number;
-    category: 'academic' | 'visa' | 'admission' | 'general' | 'other';
+    category: 'academic' | 'visa' | 'admission' | 'general';
 }
+
+interface DataItem {
+    title?: string;
+    snippet?: string;
+    link?: string;
+}
+
 
 interface WebSearchService {
     search(query: string, asuContext?: boolean): Promise<SearchResult[]>;
 }
 
-// Enhanced ASU-focused search implementation
+// ASU-focused search implementation
 class ASUSearchService implements WebSearchService {
     private apiKey = process.env.GOOGLE_API_KEY || '';
     private searchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID || '';
 
     async search(query: string, asuContext: boolean = true): Promise<SearchResult[]> {
-        // Only enhance query with ASU context if it's education-related
-        const isEducationRelated = query.match(/study|education|school|university|college|learn|student/i);
-        const enhancedQuery = asuContext && isEducationRelated
-            ? `Angelo State University ${query}`
+        // Enhance query with ASU Cambodia context
+        const enhancedQuery = asuContext
+            ? `Angelo State University Cambodia ${query} study abroad visa`
             : query;
 
         if (!this.apiKey || !this.searchEngineId) {
@@ -44,38 +50,20 @@ class ASUSearchService implements WebSearchService {
 
             const data = await response.json();
 
-            return (data.items || []).map((item: unknown, index: number) => {
-                if (
-                    typeof item === "object" &&
-                    item !== null &&
-                    "title" in item &&
-                    "snippet" in item &&
-                    "link" in item
-                ) {
-                    const { title, snippet, link } = item as {
-                        title: string;
-                        snippet: string;
-                        link: string;
-                    };
-
-                    return {
-                        title,
-                        snippet,
-                        url: link,
-                        relevance: 1 - index * 0.1,
-                        category: this.categorizeResult(title + " " + snippet),
-                    };
-                }
-                return null;
-            });
-
+            return (data.items || []).map((item: DataItem, index: number) => ({
+                title: item.title,
+                snippet: item.snippet,
+                url: item.link,
+                relevance: 1 - index * 0.1,
+                category: this.categorizeResult(`${item.title} ${item.snippet}`)
+            }));
         } catch (error) {
-            console.error('Search error:', error);
+            console.error('ASU Search error:', error);
             return this.fallbackSearch(enhancedQuery);
         }
     }
 
-    private categorizeResult(content: string): 'academic' | 'visa' | 'admission' | 'general' | 'other' {
+    private categorizeResult(content: string): 'academic' | 'visa' | 'admission' | 'general' {
         const lowerContent = content.toLowerCase();
 
         if (lowerContent.includes('visa') || lowerContent.includes('immigration')) {
@@ -84,21 +72,18 @@ class ASUSearchService implements WebSearchService {
         if (lowerContent.includes('admission') || lowerContent.includes('apply') || lowerContent.includes('enrollment')) {
             return 'admission';
         }
-        if (lowerContent.includes('course') || lowerContent.includes('program') || lowerContent.includes('degree') || lowerContent.includes('study')) {
+        if (lowerContent.includes('course') || lowerContent.includes('program') || lowerContent.includes('degree')) {
             return 'academic';
         }
-        if (lowerContent.includes('angelo') || lowerContent.includes('asu') || lowerContent.includes('university')) {
-            return 'academic';
-        }
-        return 'other';
+        return 'general';
     }
 
     private fallbackSearch(query: string): SearchResult[] {
-        // More comprehensive fallback
+        // Basic fallback when APIs are unavailable
         return [{
-            title: "Information Search",
-            snippet: `I'm searching for information about "${query}". While I specialize in ASU and study abroad, I can help you find information on various topics.`,
-            url: "search",
+            title: "ASU Cambodia Information",
+            snippet: "I'm searching for the latest information about Angelo State University programs in Cambodia. Please contact our office for current details.",
+            url: "contact",
             relevance: 0.5,
             category: 'general'
         }];
@@ -113,7 +98,7 @@ interface ASUKnowledgeItem {
     patterns: RegExp[];
     response: string;
     khmerResponse?: string;
-    category: 'visa' | 'academic' | 'admission' | 'contact' | 'success_stories' | 'services' | 'general' | 'other';
+    category: 'visa' | 'academic' | 'admission' | 'contact' | 'success_stories' | 'services';
     confidence: number;
     usageCount: number;
     successRate: number;
@@ -136,7 +121,7 @@ interface ASUKnowledgeItem {
     };
 }
 
-// Auto-learning data for broader context
+// Auto-learning data for ASU context
 interface ASULearningData {
     patterns: Map<string, {
         frequency: number;
@@ -159,7 +144,7 @@ interface ASULearningData {
         responseTime: number;
     }>;
     studentQueries: Map<string, number>;
-    generalQueries: Map<string, number>;
+    visaQuestions: Map<string, number>;
     successStories: Array<{
         studentName: string;
         program: string;
@@ -174,12 +159,12 @@ interface ASULearningData {
     trendingTopics: Map<string, { count: number; lastSeen: Date; category: string }>;
 }
 
-// Initialize learning data
+// Initialize ASU learning data
 const asuLearningData: ASULearningData = {
     patterns: new Map(),
     userInteractions: [],
     studentQueries: new Map(),
-    generalQueries: new Map(),
+    visaQuestions: new Map(),
     successStories: [
         {
             studentName: "Sonika Ketyarath",
@@ -192,20 +177,16 @@ const asuLearningData: ASULearningData = {
     trendingTopics: new Map()
 };
 
-// Enhanced ASU Cambodia Knowledge Base with general knowledge
+// ASU Cambodia Knowledge Base
 const asuKnowledgeBase: ASUKnowledgeItem[] = [
-    // ... (keep all the existing ASU-specific items from previous code)
-    // Existing ASU items here...
-
-    // Add general knowledge items
     {
-        id: "general_greeting",
-        keywords: ["hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening"],
-        khmerKeywords: ["សួស្តី", "ជំរាបសួរ", "អូន", "សុំសួរ"],
-        patterns: [/^(hi|hello|hey|greetings|good\s(morning|afternoon|evening))/i],
-        response: "Hello! I'm here to help you with information about Angelo State University, study abroad opportunities, and general knowledge. How can I assist you today?",
-        khmerResponse: "សួស្តី! ខ្ញុំនៅទីនេះដើម្បីជួយអ្នកជាមួយព័ត៌មានអំពី Angelo State University ឱកាសសិក្សាបរទេស និងចំណេះដឹងទូទៅ។ តើខ្ញុំអាចជួយអ្នកយ៉ាងដូចម្តេចថ្ងៃនេះ?",
-        category: "general",
+        id: "greeting",
+        keywords: ["hello", "hi", "សួស្តី", "អូន"],
+        khmerKeywords: ["សួស្តី", "ជំរាបសួរ", "អូន"],
+        patterns: [/^(hi|hello|hey|សួស្តី)/i],
+        response: "Hello! Welcome to ASU Cambodia Information Center. I'm here to help you learn about Angelo State University opportunities for Cambodian students.",
+        khmerResponse: "សួស្តី! ស្វាគមន៍មកកាន់មជ្ឈមណ្ឌលព័ត៌មាន ASU កម្ពុជា។ ខ្ញុំនៅទីនេះដើម្បីជួយអ្នកស្វែងយល់អំពីឱកាសសិក្សានៅ Angelo State University សម្រាប់សិស្សកម្ពុជា។",
+        category: "contact",
         confidence: 0.95,
         usageCount: 0,
         successRate: 0.95,
@@ -217,44 +198,339 @@ const asuKnowledgeBase: ASUKnowledgeItem[] = [
         userFeedback: []
     },
     {
-        id: "general_help",
-        keywords: ["help", "assist", "support", "what can you do", "how can you help"],
-        khmerKeywords: ["ជំនួយ", "ដៃគូ", "គាំទ្រ", "អ្វីដែលអ្នកអាចធ្វើ", "របៀបជួយ"],
-        patterns: [/help/i, /assist/i, /support/i, /what.*can.*you.*do/i],
-        response: "I can help you with:\n• ASU programs and admissions\n• Student visa information\n• Study abroad opportunities\n• General knowledge questions\n• Current events and information\n• And much more!\n\nWhat would you like to know about?",
-        khmerResponse: "ខ្ញុំអាចជួយអ្នកជាមួយ:\n• កម្មវិធី ASU និងការចូលរៀន\n• ព័ត៌មានវីសារសិស្ស\n• ឱកាសសិក្សាបរទេស\n• សំណួរចំណេះដឹងទូទៅ\n• ព្រឹត្តិការណ៍បច្ចុប្បន្ន និងព័ត៌មាន\n• និងច្រើនទៀត!\n\nតើអ្នកចង់ដឹងអំពីអ្វី?",
-        category: "general",
-        confidence: 0.90,
+        id: "services_overview",
+        keywords: ["services", "what do you offer", "help", "assistance", "សេវាកម្ម"],
+        khmerKeywords: ["សេវាកម្ម", "ជំនួយ", "ផ្តល់ជូន"],
+        patterns: [/what.*services/i, /what.*offer/i, /អ្វីខ្លះ.*សេវា/i],
+        response: `🎓 **ASU Cambodia Services**
+
+We provide comprehensive support for Cambodian students:
+
+**📋 Our Services Include:**
+• Student visa consultation and processing for USA
+• Tourism visa assistance for USA
+• Study abroad opportunities at Angelo State University & Australia
+• Degree programs: Bachelor's, Master's, PhD & Vocational training
+• Special pricing like US/Australian citizens
+
+**🏢 Contact Information:**
+• Location: The Base Building, near Tuol Kork Antenna
+• Phone: 023-902300 / 096-9767031  
+• Telegram: @Ambitious_Students_ubiquitous
+
+We are the **exclusive representative** for ASU in Cambodia!`,
+        khmerResponse: `🎓 **សេវាកម្ម ASU កម្ពុជា**
+
+យើងផ្តល់ការគាំទ្រពេញលេញសម្រាប់សិស្សកម្ពុជា:
+
+**📋 សេវាកម្មរបស់យើង:**
+• ប្រឹក្សា និងរៀបចំវីសារសិស្សទៅអាមេរិក
+• ជំនួយវីសារទេសចរណ៍ទៅអាមេរិក  
+• ឱកាសសិក្សាបរទេសនៅ Angelo State University និងអូស្ត្រាលី
+• កម្មវិធីសិក្សា: បរិញ្ញាប័ត្រ, អនុបណ្ឌិត, បណ្ឌិត និងសាលាជំនាញ
+• តម្លៃពិសេសដូចពលរដ្ឋអាមេរិក និងអូស្ត្រាលី
+
+**🏢 ព័ត៌មានទំនាក់ទំនង:**
+• ទីតាំង: អាគារ The Base ជិតអង់តែនទួលគោក
+• ទូរស័ព្ទ: 023-902300 / 096-9767031
+• Telegram: @Ambitious_Students_ubiquitous
+
+យើងជាតំណាងពេញសិទ្ធិតែមួយគត់នៅកម្ពុជា!`,
+        category: "services",
+        confidence: 0.95,
         usageCount: 0,
         successRate: 0.90,
         lastUsed: new Date(),
         lastUpdated: new Date(),
         webSearchEnabled: true,
         autoUpdate: true,
-        sources: [],
+        sources: ["ASU Cambodia Official"],
         userFeedback: []
     },
     {
-        id: "general_thanks",
-        keywords: ["thank", "thanks", "appreciate", "grateful", "អរគុណ", "ដឹងគុណ"],
-        khmerKeywords: ["អរគុណ", "ដឹងគុណ", "សូមអរគុណ"],
-        patterns: [/thank/i, /appreciate/i, /grateful/i, /អរគុណ/i],
-        response: "You're welcome! I'm glad I could help. If you have any more questions about ASU, study abroad, or anything else, feel free to ask!",
-        khmerResponse: "មិនមែនអ្វីទេ! ខ្ញុំរីករាយដែលអាចជួយបាន។ ប្រសិនបើអ្នកមានសំណួរបន្ថែមអំពី ASU ការសិក្សានៅបរទេស ឬអ្វីផ្សេងទៀត សូមសួរដោយសេរី!",
-        category: "general",
-        confidence: 0.95,
+        id: "student_visa",
+        keywords: ["student visa", "visa", "F1", "study visa", "វីសារសិស្ស"],
+        khmerKeywords: ["វីសារសិស្ស", "វីសារសិក្សា", "F1"],
+        patterns: [/student.*visa/i, /F1.*visa/i, /វីសារ.*សិស្ស/i],
+        response: `🛂 **Student Visa Services (F-1 Visa)**
+
+**✅ What We Provide:**
+• Complete F-1 student visa consultation
+• Document preparation and review
+• Interview preparation and coaching  
+• Application timeline management
+• Post-arrival support guidance
+
+**📋 Required Documents:**
+• Valid passport
+• I-20 form from ASU
+• Financial documents (bank statements, sponsorship)
+• Academic transcripts
+• English proficiency scores (TOEFL/IELTS)
+• Visa application fee payment
+
+**⏱️ Processing Timeline:**
+• Application preparation: 2-4 weeks
+• Embassy interview: 1-3 weeks wait time
+• Visa processing: 3-5 business days
+
+**💡 Success Rate:** 95% approval rate for our students!
+
+Need assistance with your student visa? Contact us for personalized guidance.`,
+        category: "visa",
+        confidence: 0.92,
         usageCount: 0,
         successRate: 0.95,
         lastUsed: new Date(),
         lastUpdated: new Date(),
+        webSearchEnabled: true,
+        autoUpdate: true,
+        sources: ["US Embassy Cambodia", "ASU International Office"],
+        userFeedback: []
+    },
+    {
+        id: "tourism_visa",
+        keywords: ["tourism visa", "tourist visa", "B2", "travel visa", "វីសារទេសចរណ៍"],
+        khmerKeywords: ["វីសារទេសចរណ៍", "វីសារធ្វើដំណើរ", "B2"],
+        patterns: [/tour(ism|ist).*visa/i, /travel.*visa/i, /B2.*visa/i, /វីសារ.*ទេសចរណ៍/i],
+        response: `🌍 **Tourism Visa Services (B-2 Visa)**
+
+**✅ Our Tourism Visa Services:**
+• B-2 tourist visa consultation
+• Travel itinerary planning assistance
+• Documentation preparation
+• Interview preparation
+• Travel insurance guidance
+
+**📋 Required Documents:**
+• Valid passport (6+ months validity)
+• Completed DS-160 form
+• Visa fee payment receipt
+• Photo meeting specifications
+• Proof of employment/income
+• Travel itinerary
+• Hotel reservations
+• Return ticket booking
+
+**💰 Estimated Costs:**
+• US visa fee: $160
+• Service fee: Contact for current rates
+• Additional documents: Variable
+
+**⏱️ Processing Time:** 
+• Standard processing: 7-14 days
+• Emergency processing: 3-5 days (additional fee)
+
+Ready to explore America? Let us handle your tourism visa process!`,
+        category: "visa",
+        confidence: 0.90,
+        usageCount: 0,
+        successRate: 0.88,
+        lastUsed: new Date(),
+        lastUpdated: new Date(),
+        webSearchEnabled: true,
+        autoUpdate: true,
+        sources: ["US Embassy Cambodia"],
+        userFeedback: []
+    },
+    {
+        id: "asu_programs",
+        keywords: ["Angelo State", "ASU", "programs", "degrees", "majors", "courses"],
+        khmerKeywords: ["កម្មវិធីសិក្សា", "ជំនាញ", "សាកលវិទ្យាល័យ"],
+        patterns: [/Angelo.*State/i, /ASU.*program/i, /degree.*program/i],
+        response: `🎓 **Angelo State University Programs**
+
+**🏛️ About Angelo State University:**
+• Located in San Angelo, Texas, USA
+• Founded in 1928 - Nearly 100 years of excellence
+• Over 100+ undergraduate and graduate programs
+• Small class sizes with personalized attention
+
+**📚 Popular Programs for International Students:**
+• **Business Administration** - Marketing, Finance, Management
+• **Engineering** - Mechanical, Computer, Civil Engineering  
+• **Computer Science** - Software Development, Cybersecurity
+• **Health Sciences** - Nursing, Kinesiology, Psychology
+• **Chemistry** - Like our success story student Sonika Ketyarath!
+• **Agriculture & Environmental Sciences**
+
+**🌟 Special Advantages:**
+• In-state tuition rates for international students
+• Small campus community (10,000+ students)
+• Excellent faculty-to-student ratio
+• Strong career services and job placement
+• Pathway programs available for English improvement
+
+**💰 Tuition Benefits:**
+• Same rates as US residents
+• Scholarship opportunities available
+• Work-study programs permitted
+
+Want to know more about specific programs? I can provide detailed information!`,
+        category: "academic",
+        confidence: 0.94,
+        usageCount: 0,
+        successRate: 0.92,
+        lastUsed: new Date(),
+        lastUpdated: new Date(),
+        webSearchEnabled: true,
+        autoUpdate: true,
+        sources: ["Angelo State University Official", "ASU Academic Catalog"],
+        userFeedback: []
+    },
+    {
+        id: "australia_programs",
+        keywords: ["Australia", "Australian university", "study Australia", "អូស្ត្រាលី"],
+        khmerKeywords: ["អូស្ត្រាលី", "សិក្សាអូស្ត្រាលី"],
+        patterns: [/Australia/i, /Australian.*study/i, /អូស្ត្រាលី/i],
+        response: `🇦🇺 **Study in Australia Programs**
+
+**✅ Australian University Partners:**
+• Multiple university partnerships across Australia
+• Bachelor's, Master's, and PhD programs
+• Vocational and technical training options
+• Pathway programs for international students
+
+**🌟 Benefits of Studying in Australia:**
+• High-quality education system
+• Post-study work opportunities
+• Multicultural environment
+• Beautiful climate and lifestyle
+• Strong job market for graduates
+
+**💰 Special Pricing:**
+• Same tuition rates as Australian residents
+• Reduced international student fees
+• Scholarship opportunities available
+• Work rights during studies (20 hours/week)
+
+**📋 Popular Fields:**
+• Engineering & Technology
+• Business & Management  
+• Health Sciences & Medicine
+• Information Technology
+• Hospitality & Tourism
+
+**🛂 Visa Support:**
+• Student visa (subclass 500) assistance
+• Post-study work visa guidance
+• Permanent residency pathway information
+
+Contact us for detailed information about Australian university options and admission requirements!`,
+        category: "academic",
+        confidence: 0.91,
+        usageCount: 0,
+        successRate: 0.89,
+        lastUsed: new Date(),
+        lastUpdated: new Date(),
+        webSearchEnabled: true,
+        autoUpdate: true,
+        sources: ["Australian Universities", "Department of Home Affairs Australia"],
+        userFeedback: []
+    },
+    {
+        id: "success_stories",
+        keywords: ["success", "student", "Sonika", "chemistry", "graduate", "រឿងជោគជ័យ"],
+        khmerKeywords: ["ជោគជ័យ", "សិស្ស", "បញ្ចប់ការ�សិក្សា"],
+        patterns: [/success.*story/i, /Sonika/i, /graduate.*story/i, /រឿង.*ជោគជ័យ/i],
+        response: `🌟 **Student Success Stories**
+
+**👩‍🔬 Featured Success: Sonika Ketyarath**
+• **Program:** Chemistry Major (3rd Year)  
+• **University:** Angelo State University
+• **Current Project:** Soybean oil extraction research
+• **Achievement:** Excelling in one of ASU's most challenging majors
+
+*"From the classroom to the laboratory — turning knowledge into action! Her dedication and passion for science are proof that Cambodia is gaining a valuable human resource for the future. Truly proud of her!"*
+
+**🎯 What Makes Our Students Successful:**
+• Rigorous academic preparation before departure
+• Continuous support during studies
+• Strong foundation in English and academics
+• Cultural adaptation assistance
+• Career guidance and internship support
+
+**📈 Our Track Record:**
+• 95% student visa approval rate
+• 90% of students maintain good academic standing
+• High graduation rates across all programs
+• Many students secure internships and jobs
+
+**💪 Why Cambodian Students Excel at ASU:**
+• Strong work ethic and determination
+• Excellent mathematical and analytical skills
+• Adaptability and resilience
+• Cultural diversity brings fresh perspectives
+
+Your success story could be next! Ready to join our achievers at Angelo State University?`,
+        category: "success_stories",
+        confidence: 0.96,
+        usageCount: 0,
+        successRate: 0.94,
+        lastUsed: new Date(),
+        lastUpdated: new Date(),
+        webSearchEnabled: false,
+        autoUpdate: true,
+        sources: ["ASU Cambodia Success Records"],
+        userFeedback: []
+    },
+    {
+        id: "contact_info",
+        keywords: ["contact", "address", "phone", "telegram", "location", "ទំនាក់ទំនង"],
+        khmerKeywords: ["ទំនាក់ទំនង", "អាសយដ្ឋាន", "ទូរ�ស័ព្ទ"],
+        patterns: [/contact.*info/i, /address/i, /phone.*number/i, /ទំនាក់ទំនង/i],
+        response: `📞 **Contact ASU Cambodia**
+
+**🏢 Office Location:**
+The Base Building (អាគារ The Base)
+Near Tuol Kork Antenna (ជិតអង់តែនទួលគោក)
+Phnom Penh, Cambodia
+
+**📱 Phone Numbers:**
+• Main Office: 023-902300
+• Mobile/WhatsApp: 096-9767031
+
+**💬 Digital Contact:**
+• Telegram: @Ambitious_Students_ubiquitous
+• Email: cambodiaasu@gmail.com (if available)
+
+**🕐 Office Hours:**
+• Monday - Friday: 8:00 AM - 5:00 PM
+• Saturday: 8:00 AM - 12:00 PM  
+• Sunday: Closed
+
+**🚗 How to Find Us:**
+• Located in Tuol Kork district
+• Near the prominent Tuol Kork antenna
+• Easy access by tuk-tuk, car, or moto
+• Parking available
+
+**💡 Best Times to Visit:**
+• Morning (8:00-11:00 AM) for consultations
+• Afternoon (2:00-4:00 PM) for document submission
+• Call ahead to schedule appointments
+
+**🌟 Why Visit Our Office:**
+• Face-to-face consultation with experts
+• Document review and verification
+• Personalized guidance for your situation
+• Meet our experienced counselors
+
+Ready to start your journey? Contact us today!`,
+        category: "contact",
+        confidence: 0.98,
+        usageCount: 0,
+        successRate: 0.96,
+        lastUsed: new Date(),
+        lastUpdated: new Date(),
         webSearchEnabled: false,
         autoUpdate: false,
-        sources: [],
+        sources: ["ASU Cambodia Office"],
         userFeedback: []
     }
 ];
 
-// Enhanced Learning Engine
+// ASU Learning Engine
 class ASULearningEngine {
     static extractASUFeatures(text: string): string[] {
         const words = text.toLowerCase()
@@ -264,17 +540,13 @@ class ASULearningEngine {
 
         const features = [...words];
 
-        // Enhanced feature patterns for broader topics
+        // ASU-specific feature patterns
         if (text.match(/វីសារ|visa/i)) features.push('_VISA_INQUIRY');
-        if (text.match(/សិក្សា|study|education|learn/i)) features.push('_EDUCATION_INQUIRY');
-        if (text.match(/Angelo|ASU|university|college/i)) features.push('_ASU_SPECIFIC');
-        if (text.match(/Australia|អូស្ត្រាលី|abroad/i)) features.push('_ABROAD_INQUIRY');
-        if (text.match(/ទំនាក់ទំនង|contact|phone|address/i)) features.push('_CONTACT_REQUEST');
-        if (text.match(/តម្លៃ|price|cost|fee|money/i)) features.push('_PRICING_INQUIRY');
-        if (text.match(/what|how|when|where|why|who/i)) features.push('_GENERAL_QUESTION');
-        if (text.match(/news|current|event|update/i)) features.push('_CURRENT_EVENTS');
-        if (text.match(/weather|temperature|forecast/i)) features.push('_WEATHER');
-        if (text.match(/time|date|day|year/i)) features.push('_TIME_DATE');
+        if (text.match(/សិក្សា|study|education/i)) features.push('_EDUCATION_INQUIRY');
+        if (text.match(/Angelo|ASU/i)) features.push('_ASU_SPECIFIC');
+        if (text.match(/Australia|អូស្ត្រាលី/i)) features.push('_AUSTRALIA_INQUIRY');
+        if (text.match(/ទំនាក់ទំនង|contact|phone/i)) features.push('_CONTACT_REQUEST');
+        if (text.match(/តម្លៃ|price|cost|fee/i)) features.push('_PRICING_INQUIRY');
 
         // Add bigrams for better context
         for (let i = 0; i < words.length - 1; i++) {
@@ -303,8 +575,7 @@ class ASULearningEngine {
             wasHelpful,
             language,
             category,
-            responseTime: 0,
-            searchUsed: response.includes('Latest Information') || response.includes('ព័ត៌មានបានប្រមូល')
+            responseTime: 0
         });
 
         // Update pattern learning
@@ -347,24 +618,25 @@ class ASULearningEngine {
         const lower = input.toLowerCase();
 
         if (lower.match(/វីសារ|visa/)) return 'visa';
-        if (lower.match(/program|degree|major|course|study|education|learn/)) return 'academic';
-        if (lower.match(/contact|phone|address|location/)) return 'contact';
-        if (lower.match(/success|graduate|student|achievement/)) return 'success_stories';
-        if (lower.match(/service|help|assist|support/)) return 'services';
-        if (lower.match(/time|date|weather|news|current/)) return 'general';
-        if (lower.match(/what|how|when|where|why|who/)) return 'general';
+        if (lower.match(/program|degree|major|course/)) return 'academic';
+        if (lower.match(/contact|phone|address/)) return 'contact';
+        if (lower.match(/success|graduate|student/)) return 'success_stories';
+        if (lower.match(/service|help|assist/)) return 'services';
 
-        return 'other';
+        return 'general';
     }
 
     private static updateCategoryLearning(input: string, category: string): void {
-        // Update queries tracking
-        if (category === 'academic' || category === 'visa') {
+        // Update student queries tracking
+        if (category === 'academic') {
             const count = asuLearningData.studentQueries.get(input) || 0;
             asuLearningData.studentQueries.set(input, count + 1);
-        } else {
-            const count = asuLearningData.generalQueries.get(input) || 0;
-            asuLearningData.generalQueries.set(input, count + 1);
+        }
+
+        // Update visa questions tracking
+        if (category === 'visa') {
+            const count = asuLearningData.visaQuestions.get(input) || 0;
+            asuLearningData.visaQuestions.set(input, count + 1);
         }
 
         // Update trending topics
@@ -381,12 +653,12 @@ class ASULearningEngine {
         }
     }
 
-    static async performWebSearch(query: string): Promise<SearchResult[]> {
+    static async performASUSearch(query: string): Promise<SearchResult[]> {
         const searchService = new ASUSearchService();
-        return await searchService.search(query, false); // Don't force ASU context for general queries
+        return await searchService.search(query, true);
     }
 
-    static generateEnhancedResponse(
+    static generateASUResponse(
         baseResponse: string,
         searchResults: SearchResult[],
         language: 'en' | 'km' = 'en'
@@ -412,14 +684,15 @@ class ASULearningEngine {
     }
 }
 
-// Enhanced Main Chatbot
+// Main ASU Chatbot
 class ASUChatBot {
     private static detectLanguage(message: string): 'en' | 'km' {
+        // Simple language detection based on Unicode ranges
         const khmerChars = /[\u1780-\u17FF]/;
         return khmerChars.test(message) ? 'km' : 'en';
     }
 
-    private static async findBestMatch(message: string): Promise<ASUKnowledgeItem | null> {
+    private static async findBestASUMatch(message: string): Promise<ASUKnowledgeItem | null> {
         let bestMatch: ASUKnowledgeItem | null = null;
         let highestScore = 0;
         const language = this.detectLanguage(message);
@@ -459,17 +732,16 @@ class ASUChatBot {
         return bestMatch;
     }
 
-    public static async processMessage(
+    public static async processASUMessage(
         message: string,
         sessionId: string = "default"
     ): Promise<{
         reply: string;
-        language: 'en' | 'km';
+        language: "en" | "km";
         category: string;
         searchUsed: boolean;
         confidence: number;
-        responseTime: number;
-        sources: string[];
+        responseTime: number
     }> {
         const startTime = Date.now();
         const language = this.detectLanguage(message);
@@ -478,10 +750,10 @@ class ASUChatBot {
 
         try {
             // Find best knowledge match
-            const bestMatch = await this.findBestMatch(message);
+            const bestMatch = await this.findBestASUMatch(message);
             let response = "";
             let category = "general";
-            let confidence = 0.7; // Default confidence for general queries
+            let confidence = 0;
 
             if (bestMatch) {
                 // Use appropriate language response
@@ -501,9 +773,9 @@ class ASUChatBot {
                 if (bestMatch.webSearchEnabled) {
                     searchUsed = true;
                     try {
-                        const searchResults = await ASULearningEngine.performWebSearch(message);
+                        const searchResults = await ASULearningEngine.performASUSearch(message);
                         if (searchResults.length > 0) {
-                            response = ASULearningEngine.generateEnhancedResponse(response, searchResults, language);
+                            response = ASULearningEngine.generateASUResponse(response, searchResults, language);
                             sources = [...sources, ...searchResults.map(r => r.url)];
                             confidence = Math.min(confidence + 0.05, 0.98);
 
@@ -517,31 +789,31 @@ class ASUChatBot {
                             bestMatch.lastUpdated = new Date();
                         }
                     } catch (error) {
-                        console.warn('Web search failed:', error);
+                        console.warn('ASU search failed:', error);
                     }
                 }
             } else {
-                // No knowledge match - use web search for all queries
+                // No knowledge match - try web search for ASU-related queries
                 searchUsed = true;
-                category = "other";
+                category = "general";
                 confidence = 0.6;
 
                 try {
-                    const searchResults = await ASULearningEngine.performWebSearch(message);
+                    const searchResults = await ASULearningEngine.performASUSearch(message);
                     if (searchResults.length > 0) {
                         const baseResponse = language === 'km'
-                            ? `ខ្ញុំរកឃើញព័ត៌មាននេះអំពី "${message}":`
-                            : `I found this information about "${message}":`;
+                            ? "ខ្ញុំរកឃើញព័ត៌មានមួយចំនួនអំពីសំណួររបស់អ្នក:"
+                            : "I found some information about your question:";
 
-                        response = ASULearningEngine.generateEnhancedResponse(baseResponse, searchResults, language);
+                        response = ASULearningEngine.generateASUResponse(baseResponse, searchResults, language);
                         sources = searchResults.map(r => r.url);
                         confidence = 0.75;
                     } else {
-                        response = this.generateFallback(message, language);
+                        response = this.generateASUFallback(message, language);
                         confidence = 0.4;
                     }
                 } catch (error) {
-                    response = this.generateFallback(message, language);
+                    response = this.generateASUFallback(message, language);
                     confidence = 0.3;
                 }
             }
@@ -563,14 +835,13 @@ class ASUChatBot {
                 category,
                 searchUsed,
                 confidence,
-                responseTime,
-                sources
+                responseTime
             };
 
         } catch (error) {
-            console.error("ChatBot Error:", error);
+            console.error("ASU ChatBot Error:", error);
 
-            const fallbackResponse = this.generateFallback(message, this.detectLanguage(message));
+            const fallbackResponse = this.generateASUFallback(message, this.detectLanguage(message));
             const responseTime = Date.now() - startTime;
 
             return {
@@ -579,23 +850,22 @@ class ASUChatBot {
                 category: "error",
                 searchUsed: false,
                 confidence: 0.2,
-                responseTime,
-                sources: []
+                responseTime
             };
         }
     }
 
-    private static generateFallback(message: string, language: 'en' | 'km'): string {
+    private static generateASUFallback(message: string, language: 'en' | 'km'): string {
         const fallbacks = {
             en: [
-                `I'm researching information about "${message}". While I specialize in ASU and study abroad, I can help you find information on various topics using web search.`,
-                `That's an interesting question! Let me search for the most current information about "${message}" for you.`,
-                `I'm expanding my knowledge base to include more topics. Let me find the latest information about "${message}" from reliable sources.`
+                "I'm still learning about that topic. As the exclusive ASU Cambodia representative, I can connect you with our expert counselors for detailed information. Please contact us at 023-902300 or visit The Base Building near Tuol Kork Antenna.",
+                "That's an interesting question about ASU or studying abroad! While I continue learning, our experienced team can provide you with personalized guidance. Call 096-9767031 or message us on Telegram @Ambitious_Students_ubiquitous.",
+                "I'm expanding my knowledge about ASU programs daily. For immediate assistance with student visas, academic programs, or application processes, please contact our office directly. We're here to help make your study abroad dreams come true!"
             ],
             km: [
-                `ខ្ញុំកំពុងស្រាវជ្រាវព័ត៌មានអំពី "${message}"។ ខណៈខ្ញុំឯកទេសខាង ASU និងការសិក្សានៅបរទេស ខ្ញុំអាចជួយអ្នករកព័ត៌មានអំពីប្រធានបទផ្សេងៗដោយប្រើការស្វែងរកវេប។`,
-                `នេះជាសំណួរគួរឱ្យចាប់អារម្មណ៍! សូមឱ្យខ្ញុំស្វែងរកព័ត៌មានចុងក្រោយបំផុតអំពី "${message}" សម្រាប់អ្នក។`,
-                `ខ្ញុំកំពុងពង្រីកមូលដ្ឋានចំណេះដឹងរបស់ខ្ញុំដើម្បីរួមបញ្ចូលប្រធានបទបន្ថែមទៀត។ សូមឱ្យខ្ញុំរកព័ត៌មានចុងក្រោយបំផុតអំពី "${message}" ពីប្រភពដែលអាចទុកចិត្តបាន។`
+                "ខ្ញុំកំពុងរៀនអំពីប្រធានបទនេះ។ ជាតំណាងពេញសិទ្ធិ ASU កម្ពុជាតែមួយគត់ ខ្ញុំអាចភ្ជាប់អ្នកជាមួយប្រឹក្សាជំនាញរបស់យើងសម្រាប់ព័ត៌មានលម្អិត។ សូមទាក់ទងមកយើងតាម 023-902300 ឬមកការិយាល័យនៅអាគារ The Base ជិតអង់តែនទួលគោក។",
+                "នេះជាសំណួរគួរឱ្យចាប់អារម្មណ៍អំពី ASU ឬការសិក្សាបរទេស! ខណៈដែលខ្ញុំបន្តរៀនសូត្រ ក្រុមការងារដែលមានបទពិសោធន៍របស់យើងអាចផ្តល់ការណែនាំផ្ទាល់ខ្លួនដល់អ្នក។ ទូរស័ព្ទ 096-9767031 ឬផ្ញើសារតាម Telegram @Ambitious_Students_ubiquitous។",
+                "ខ្ញុំកំពុងពង្រីកចំណេះដឹងរបស់ខ្ញុំអំពីកម្មវិធី ASU ជារៀងរាល់ថ្ងៃ។ សម្រាប់ជំនួយបន្ទាន់ជាមួយវីសារសិស្ស កម្មវិធីសិក្សា ឬដំណើរការដាក់ពាក្យ សូមទាក់ទងការិយាល័យរបស់យើងដោយផ្ទាល់។ យើងនៅទីនេះដើម្បីជួយធ្វើឱ្យសុបិនសិក្សាបរទេសរបស់អ្នកកាយជាការពិត!"
             ]
         };
 
@@ -603,36 +873,40 @@ class ASUChatBot {
         return languageFallbacks[Math.floor(Math.random() * languageFallbacks.length)];
     }
 
-    // Enhanced auto-generation for broader topics
-    private static async autoGenerateKnowledge(): Promise<void> {
+    // Auto-generate new ASU knowledge from frequent queries
+    private static async autoGenerateASUKnowledge(): Promise<void> {
+        // Analyze frequently asked questions that don't have good matches
         const frequentQueries = Array.from(asuLearningData.trendingTopics.entries())
-            .filter(([query, data]) => data.count >= 3) // Lower threshold for more topics
+            .filter(([query, data]) => data.count >= 5)
             .sort(([,a], [,b]) => b.count - a.count)
-            .slice(0, 10);
+            .slice(0, 5);
 
         for (const [query, data] of frequentQueries) {
+            // Check if we already have knowledge for this query
             const hasExistingKnowledge = asuKnowledgeBase.some(kb =>
                 kb.keywords.some(keyword => query.toLowerCase().includes(keyword.toLowerCase())) ||
                 kb.khmerKeywords.some(keyword => query.includes(keyword))
             );
 
             if (!hasExistingKnowledge) {
-                const newItem = await this.createKnowledgeItem(query, data.category);
+                // Generate new knowledge item
+                const newItem = await this.createASUKnowledgeItem(query, data.category);
                 if (newItem) {
                     asuKnowledgeBase.push(newItem);
-                    console.log(`Auto-generated knowledge: ${newItem.id}`);
+                    console.log(`Auto-generated ASU knowledge: ${newItem.id}`);
                 }
             }
         }
     }
 
-    private static async createKnowledgeItem(query: string, category: string): Promise<ASUKnowledgeItem | null> {
+    private static async createASUKnowledgeItem(query: string, category: string): Promise<ASUKnowledgeItem | null> {
         const features = ASULearningEngine.extractASUFeatures(query);
         const language = this.detectLanguage(query);
 
+        // Search for current information to create response
         let searchResults: SearchResult[] = [];
         try {
-            searchResults = await ASULearningEngine.performWebSearch(query);
+            searchResults = await ASULearningEngine.performASUSearch(query);
         } catch (error) {
             console.warn('Failed to search for auto-knowledge generation:', error);
         }
@@ -643,17 +917,39 @@ class ASUChatBot {
             ? `បានតាមការស្វែងយល់របស់អ្នកអំពី ${query}, នេះគឺជាព័ត៌មានដែលខ្ញុំរកឃើញ៖`
             : `Based on your inquiry about ${query}, here's what I found:`;
 
-        const enhancedResponse = ASULearningEngine.generateEnhancedResponse(response, searchResults, language);
+        const enhancedResponse = ASULearningEngine.generateASUResponse(response, searchResults, language);
+
+        type Category =
+            | "academic"
+            | "visa"
+            | "admission"
+            | "contact"
+            | "success_stories"
+            | "services";
+
+// Helper to ensure the category is valid
+        function getValidCategory(cat: string): Category {
+            const valid: Category[] = [
+                "academic",
+                "visa",
+                "admission",
+                "contact",
+                "success_stories",
+                "services",
+            ];
+
+            return valid.includes(cat as Category) ? (cat as Category) : "academic"; // fallback default
+        }
 
         const newItem: ASUKnowledgeItem = {
             id: `auto_${category}_${Date.now()}`,
-            keywords: features.filter(f => !f.startsWith('_') && f.length > 2).slice(0, 8),
-            khmerKeywords: language === 'km' ? [query.slice(0, 25)] : [],
+            keywords: features.filter(f => !f.startsWith('_') && f.length > 2).slice(0, 5),
+            khmerKeywords: language === 'km' ? [query.slice(0, 20)] : [],
             patterns: [new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')],
             response: enhancedResponse,
             khmerResponse: language === 'km' ? enhancedResponse : undefined,
-            category: category as never,
-            confidence: 0.65,
+            category: getValidCategory(category), // ✅ safe assignment
+            confidence: 0.7,
             usageCount: 0,
             successRate: 0.6,
             lastUsed: new Date(),
@@ -667,8 +963,8 @@ class ASUChatBot {
         return newItem;
     }
 
-    // Get comprehensive statistics
-    public static getStats() {
+    // Get comprehensive ASU learning statistics
+    public static getASUStats() {
         const totalInteractions = asuLearningData.userInteractions.length;
         const khmerInteractions = asuLearningData.userInteractions.filter(int => int.language === 'km').length;
 
@@ -679,7 +975,7 @@ class ASUChatBot {
 
         const topTrending = Array.from(asuLearningData.trendingTopics.entries())
             .sort(([,a], [,b]) => b.count - a.count)
-            .slice(0, 15);
+            .slice(0, 10);
 
         return {
             totalInteractions,
@@ -689,18 +985,18 @@ class ASUChatBot {
             autoLearnedItems: asuKnowledgeBase.filter(kb => kb.id.startsWith('auto_')).length,
             categoryBreakdown: categoryStats,
             studentQueries: asuLearningData.studentQueries.size,
-            generalQueries: asuLearningData.generalQueries.size,
+            visaQuestions: asuLearningData.visaQuestions.size,
             successStories: asuLearningData.successStories.length,
             trendingTopics: topTrending,
             averageConfidence: asuKnowledgeBase.reduce((sum, kb) => sum + kb.confidence, 0) / asuKnowledgeBase.length,
             lastUpdate: new Date().toISOString(),
             languages: ['English', 'Khmer'],
-            specialization: 'ASU & General Knowledge'
+            specializtion: 'Angelo State University & Study Abroad Services'
         };
     }
 
-    // Enhanced feedback system
-    public static async provideFeedback(
+    // Provide feedback and improve learning
+    public static async provideASUFeedback(
         sessionId: string,
         messageIndex: number,
         wasHelpful: boolean,
@@ -716,7 +1012,7 @@ class ASUChatBot {
 
         interaction.wasHelpful = wasHelpful;
 
-        // Find and update matching knowledge item
+        // Find corresponding knowledge item and update
         const matchingKB = asuKnowledgeBase.find(kb =>
             kb.response.includes(interaction.response.slice(0, 50)) ||
             (kb.khmerResponse && kb.khmerResponse.includes(interaction.response.slice(0, 50)))
@@ -730,9 +1026,10 @@ class ASUChatBot {
                 language
             });
 
+            // Update success rate
             const totalFeedback = matchingKB.userFeedback.length;
-            const positiveFeedback = matchingKB.userFeedback.filter(fb => fb.rating >= 4).length;
-            matchingKB.successRate = positiveFeedback / totalFeedback;
+            const positiveFeeback = matchingKB.userFeedback.filter(fb => fb.rating >= 4).length;
+            matchingKB.successRate = positiveFeeback / totalFeedback;
         }
 
         // Re-learn from this interaction
@@ -744,16 +1041,16 @@ class ASUChatBot {
             interaction.language
         );
 
-        // Trigger auto-improvement for negative feedback
+        // If negative feedback, trigger auto-improvement
         if (!wasHelpful) {
-            await this.autoGenerateKnowledge();
+            await this.autoGenerateASUKnowledge();
         }
 
         return true;
     }
 
     // Add new information manually
-    public static addInformation(
+    public static addASUInformation(
         keywords: string[],
         khmerKeywords: string[],
         response: string,
@@ -769,7 +1066,7 @@ class ASUChatBot {
             response,
             khmerResponse,
             category: category as never,
-            confidence: 0.85,
+            confidence: 0.9,
             usageCount: 0,
             successRate: 0.8,
             lastUsed: new Date(),
@@ -785,14 +1082,14 @@ class ASUChatBot {
     }
 }
 
-// Enhanced API handler
+// Enhanced API handler for ASU Cambodia
 export async function POST(req: Request) {
     try {
         const { message, sessionId, feedback, action, newInfo } = await req.json();
 
         switch (action) {
             case 'feedback':
-                const success = await ASUChatBot.provideFeedback(
+                const success = await ASUChatBot.provideASUFeedback(
                     sessionId || 'default',
                     feedback.messageIndex,
                     feedback.wasHelpful,
@@ -809,12 +1106,12 @@ export async function POST(req: Request) {
 
             case 'stats':
                 return NextResponse.json({
-                    stats: ASUChatBot.getStats()
+                    stats: ASUChatBot.getASUStats()
                 });
 
             case 'addInfo':
                 if (newInfo && newInfo.keywords && newInfo.response) {
-                    const newId = ASUChatBot.addInformation(
+                    const newId = ASUChatBot.addASUInformation(
                         newInfo.keywords,
                         newInfo.khmerKeywords || [],
                         newInfo.response,
@@ -825,7 +1122,7 @@ export async function POST(req: Request) {
 
                     return NextResponse.json({
                         success: true,
-                        message: `New information added successfully`,
+                        message: `New ASU information added successfully`,
                         id: newId
                     });
                 }
@@ -836,6 +1133,7 @@ export async function POST(req: Request) {
                 });
 
             default:
+                // Regular ASU chat processing
                 if (!message?.trim()) {
                     return NextResponse.json({
                         reply: "I didn't receive your message. Please try again. / ខ្ញុំមិនទទួលបានសាររបស់អ្នក។ សូមព្យាយាមម្តងទៀត។",
@@ -843,12 +1141,13 @@ export async function POST(req: Request) {
                     });
                 }
 
-                const result = await ASUChatBot.processMessage(
+                // Process with ASU-focused learning
+                const result = await ASUChatBot.processASUMessage(
                     message,
                     sessionId || 'default'
                 );
 
-                const stats = ASUChatBot.getStats();
+                const stats = ASUChatBot.getASUStats();
 
                 return NextResponse.json({
                     ...result,
@@ -858,23 +1157,21 @@ export async function POST(req: Request) {
                         knowledgeBaseSize: stats.knowledgeBaseSize,
                         autoLearnedItems: stats.autoLearnedItems,
                         languages: stats.languages,
-                        specialization: stats.specialization,
+                        specialization: stats.specializtion,
                         isLearning: true,
-                        asuFocused: true,
-                        generalKnowledge: true
+                        asuFocused: true
                     },
                     metadata: {
                         sessionId: sessionId || 'default',
                         messageLength: message.length,
                         asuSpecialized: true,
-                        bilingualSupport: true,
-                        webSearchEnabled: true
+                        bilingualSupport: true
                     }
                 });
         }
 
     } catch (error) {
-        console.error("ChatBot Error:", error);
+        console.error("ASU ChatBot Error:", error);
 
         return NextResponse.json({
             reply: "I encountered an issue, but I'm learning from it! Please try again. / ខ្ញុំមានបញ្ហា ប៉ុន្តែខ្ញុំកំពុងរៀនពីវា! សូមព្យាយាមម្តងទៀត។",
@@ -883,26 +1180,7 @@ export async function POST(req: Request) {
             confidence: 0.1,
             responseTime: 0,
             asuSpecialized: true,
-            language: 'en',
-            sources: []
+            language: 'en'
         }, { status: 500 });
     }
-}
-
-// Add GET endpoint for health check and basic functionality
-export async function GET() {
-    return NextResponse.json({
-        status: "online",
-        message: "ASU ChatBot is running with enhanced general knowledge capabilities",
-        capabilities: [
-            "ASU-specific information",
-            "Study abroad guidance",
-            "Visa assistance",
-            "General knowledge queries",
-            "Web search integration",
-            "Bilingual support (English/Khmer)",
-            "Auto-learning from interactions"
-        ],
-        timestamp: new Date().toISOString()
-    });
 }

@@ -73,7 +73,7 @@ export default function ServiceHeader() {
             icon: <FaGraduationCap size={40} className="text-green-600" />,
             title: "Scholarship Opportunities",
             description:
-                "We guarantee affordable tuition fees, assist with study packages or scholarships, and connect you with opportunities to study abroad.",
+                "We guarantee affordable conditions fees, assist with study packages or scholarships, and connect you with opportunities to study abroad.",
             gradient: "from-green-500 to-green-700"
         },
         {

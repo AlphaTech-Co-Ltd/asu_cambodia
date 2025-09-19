@@ -23,7 +23,7 @@ export default function AboutUs_HeaderPage() {
         {
             icon: "/Icon/icons8-parcel-cost-50.png",
             title: "Study Cost Assurance",
-            description: "Ensure tuition fees and living expenses are clear and manageable for students."
+            description: "Ensure conditions fees and living expenses are clear and manageable for students."
         },
         {
             icon: "/Icon/icons8-financial-support-100.png",
